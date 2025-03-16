@@ -5,23 +5,33 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLIC_KEY;
 
 // Configurazione URL di callback
-const AUTH_CALLBACK_URL =
-  import.meta.env.VITE_AUTH_CALLBACK_URL ||
-  `${window.location.origin}/auth/callback`;
+const AUTH_CALLBACK_URL = `${window.location.origin}/auth/callback`;
 
 // Crea il client Supabase
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Login con Google
 export const signInWithGoogle = async () => {
-  console.log("Redirecting OAuth to:", AUTH_CALLBACK_URL);
+  console.log("OAuth flow starting. App callback will be:", AUTH_CALLBACK_URL);
 
-  return await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: AUTH_CALLBACK_URL,
-    },
-  });
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: AUTH_CALLBACK_URL,
+        // Non impostare altri parametri qui, lascia che Supabase gestisca il flusso
+      },
+    });
+
+    if (error) {
+      console.error("OAuth initialization error:", error);
+    }
+
+    return { data, error };
+  } catch (e) {
+    console.error("Unexpected error during OAuth:", e);
+    throw e;
+  }
 };
 
 export const signInWithEmail = async (email: string, password: string) => {

@@ -73,7 +73,7 @@ const Dashboard = () => {
       <div className="mb-6 flex justify-between items-center">
         <h2 className="text-xl font-semibold">I tuoi ristoranti</h2>
         <Link
-          to="/businesses/new"
+          to="/dashboard/businesses/new"
           className="inline-flex items-center px-4 py-2 rounded-md bg-[color:var(--color-primary)] text-[color:var(--color-primary-foreground)] hover:bg-[color:var(--color-primary-dark)]"
         >
           <Plus size={16} className="mr-2" />
@@ -98,7 +98,7 @@ const Dashboard = () => {
             Non hai ancora creato nessun ristorante.
           </p>
           <Link
-            to="/businesses/new"
+            to="/dashboard/businesses/new"
             className="inline-flex items-center px-4 py-2 rounded-md bg-[color:var(--color-primary)] text-[color:var(--color-primary-foreground)] hover:bg-[color:var(--color-primary-dark)]"
           >
             <Plus size={16} className="mr-2" />
@@ -160,13 +160,13 @@ const BusinessCard = ({ business }: BusinessCardProps) => {
       </div>
       <div className="border-t p-4 bg-[color:var(--color-accent)] bg-opacity-5 flex justify-between">
         <Link
-          to={`/businesses/${business._id}`}
+          to={`/dashboard/businesses/${business._id}`}
           className="text-[color:var(--color-primary)] hover:underline text-sm"
         >
           Gestisci
         </Link>
         <Link
-          to={`/businesses/${business._id}/orders`}
+          to={`/dashboard/businesses/${business._id}/orders`}
           className="text-[color:var(--color-primary)] hover:underline text-sm"
         >
           Visualizza ordini

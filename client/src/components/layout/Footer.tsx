@@ -24,7 +24,7 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-1">
             <Link to="/" className="flex items-center mb-4">
               <span className="text-xl font-bold text-[color:var(--color-primary)]">
-                Pizzeria SaaS
+                Phone Orders AI
               </span>
             </Link>
             <p className="text-sm text-[color:var(--color-muted-foreground)] mb-4">
@@ -153,7 +153,7 @@ const Footer = () => {
 
         <div className="border-t border-[color:var(--color-border)] mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-[color:var(--color-muted-foreground)] mb-4 md:mb-0">
-            &copy; {currentYear} Pizzeria SaaS. Tutti i diritti riservati.
+            &copy; {currentYear} Phone Orders AI. Tutti i diritti riservati.
           </p>
           <div className="flex space-x-4 text-sm">
             <button

@@ -1,4 +1,4 @@
-# 🍕 Pizzeria SaaS - AI Phone Order System
+# 🍕 Phone Orders AI - AI Phone Order System
 
 [![React](https://img.shields.io/badge/React-19-blue)](https://reactjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)
@@ -7,7 +7,7 @@
 
 ## 📋 Overview
 
-Pizzeria SaaS is a cutting-edge platform enabling pizzerias to automate telephone orders through an AI-powered assistant. The system leverages Twilio for call management and DeepSeek AI models to engage in natural conversations with customers, creating a seamless ordering experience.
+Phone Orders AI is a cutting-edge platform enabling pizzerias to automate telephone orders through an AI-powered assistant. The system leverages Twilio for call management and DeepSeek AI models to engage in natural conversations with customers, creating a seamless ordering experience.
 
 ## ✨ Key Features
 

@@ -21,7 +21,7 @@ function App() {
     <div className="min-h-screen bg-[color:var(--color-background)] text-[color:var(--color-foreground)] flex flex-col justify-center items-center">
       <div className="max-w-md w-full bg-[color:var(--color-card)] text-[color:var(--color-card-foreground)] rounded-lg shadow-lg p-8">
         <h1 className="text-3xl font-bold text-center text-[color:var(--color-primary)] mb-6">
-          Pizzeria SaaS
+        Phone Orders AI
         </h1>
 
         <div className="text-center">

@@ -1,7 +1,7 @@
 {
   "name": "pizzeria-saas-server",
   "version": "1.0.0",
-  "description": "Backend for Pizzeria SaaS with AI phone ordering",
+  "description": "Backend for Phone Orders AI with AI phone ordering",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",

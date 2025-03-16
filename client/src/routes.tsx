@@ -8,18 +8,35 @@ import AuthLayout from "./components/layout/AuthLayout";
 // Pages
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
-import AuthCallback from "./pages/auth/AuthCallback"; // Percorso corretto all'import
+import AuthCallback from "./pages/auth/AuthCallback";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import Dashboard from "./pages/dashboard/Dashboard";
 import NotFound from "./pages/NotFound";
 import NewRestaurant from "./pages/restaurants/NewRestaurant";
-import BusinessDetails from "./pages/businesses/BusinessDetails"; // Importa il componente per i dettagli del business
+import BusinessDetails from "./pages/businesses/BusinessDetails";
+import LandingPage from "./pages/LandingPage";
+import BusinessMenuPage from "./pages/businesses/BusinessMenuPage";
 
 // Auth guard
 import AuthGuard from "./components/auth/AuthGuard";
 
+// Modifichiamo la struttura delle route
+
 export const router = createBrowserRouter([
+  // Route principale pubblica (landing page)
+  {
+    path: "/",
+    element: <MainLayout />,
+    children: [
+      {
+        index: true,
+        element: <LandingPage />,
+      },
+      // Altre pagine pubbliche (about, contatti, ecc.)
+    ],
+  },
+
   // Auth routes
   {
     path: "auth",
@@ -52,9 +69,9 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Main app routes (protected)
+  // App routes (protected)
   {
-    path: "/",
+    path: "/dashboard",
     element: (
       <AuthGuard>
         <MainLayout />
@@ -63,35 +80,23 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/dashboard" replace />,
-      },
-      {
-        path: "dashboard",
-        element: (
-          <AuthGuard>
-            <Dashboard />
-          </AuthGuard>
-        ),
+        element: <Dashboard />,
       },
       // Nuove route per i ristoranti
       {
-        path: "businesses/new", // Invece di "restaurants/new"
-        element: (
-          <AuthGuard>
-            <NewRestaurant />
-          </AuthGuard>
-        ),
+        path: "businesses/new",
+        element: <NewRestaurant />,
       },
-      // Aggiungi questa nuova route per i dettagli del business
+      // Route per i dettagli del business
       {
         path: "businesses/:id",
-        element: (
-          <AuthGuard>
-            <BusinessDetails />
-          </AuthGuard>
-        ),
+        element: <BusinessDetails />,
       },
-      // Aggiungeremo altre route per ristoranti in seguito
+      // Route per la gestione del menu
+      {
+        path: "businesses/:id/menu",
+        element: <BusinessMenuPage />,
+      },
     ],
   },
 

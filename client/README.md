@@ -1,6 +1,6 @@
-# Pizzeria SaaS - Frontend Application
+# Phone Orders AI - Frontend Application
 
-This directory contains the frontend React application for the Pizzeria SaaS platform.
+This directory contains the frontend React application for the Phone Orders AIplatform.
 
 ## 🛠️ Tech Stack
 

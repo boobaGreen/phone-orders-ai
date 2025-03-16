@@ -1,8 +1,45 @@
-# Roadmap Progetto Pizzeria SaaS --
+# Roadmap Progetto Phone Orders AI --
 
 ## Panoramica
 
-Questo documento elenca le funzionalità da implementare e i bug da risolvere nelle prossime iterazioni del progetto Pizzeria SaaS.
+Questo documento elenca le funzionalità da implementare e i bug da risolvere nelle prossime iterazioni del progetto Phone Orders AI.
+
+## Landing Page e Marketing
+
+- [ ] **Pagina Piani e Prezzi**
+
+  - Creare una pagina dedicata con tutti i dettagli sui piani
+  - Implementare tabella di confronto funzionalità
+  - Aggiungere FAQ specifiche per ogni piano
+  - Implementare CTA per registrazione/upgrade
+  - Usare Card e Tabs di shadcn
+
+- [ ] **Documentazione**
+
+  - Creare sezione documentazione con guide per l'utente
+  - Implementare tutorial per le funzionalità principali
+  - Aggiungere API reference per gli sviluppatori
+  - Utilizzare componenti di shadcn per la navigazione e la presentazione
+
+- [ ] **Supporto**
+
+  - Implementare sistema di ticketing integrato
+  - Aggiungere chat supporto in tempo reale
+  - Creare knowledge base per problemi comuni
+  - Integrare feedback e valutazione del supporto
+
+- [ ] **Pagina FAQ**
+
+  - Creare sezione FAQ completa
+  - Organizzare per categorie (Generale, Prezzi, Tecnico, ecc.)
+  - Implementare ricerca nelle FAQ
+  - Utilizzare Accordion di shadcn per le domande
+
+- [ ] **Aggiornare Footer**
+  - Aggiornare i link nel footer
+  - Aggiungere social media
+  - Includere informazioni legali aggiornate
+  - Migliorare il layout responsivo
 
 ## Gestione Ristoranti
 
@@ -103,6 +140,83 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
   - Notifiche push (se implementato)
   - Utilizzare Switch e Checkbox di shadcn
 
+## Backend e Infrastruttura
+
+### Integrazione DeepSeek AI
+
+- [ ] **Miglioramento Prompt**
+
+  - Ottimizzare i prompt di sistema per migliorare la comprensione degli ordini
+  - Aggiungere esempi specifici per gestire casi d'uso complessi
+  - Implementare prompt diversificati per diverse lingue e dialetti regionali
+
+- [ ] **Gestione Conversazioni**
+
+  - Migliorare il sistema di gestione delle conversazioni con contesto
+  - Implementare meccanismo per ricordare ordini precedenti dei clienti
+  - Aggiungere capacità di gestione delle interruzioni o cambiamenti durante l'ordine
+
+- [ ] **Analisi Semantica**
+
+  - Implementare analisi semantica avanzata per estrarre informazioni dagli ordini
+  - Migliorare il riconoscimento di entità (prodotti, modifiche, quantità)
+  - Aggiungere suggerimenti intelligenti basati sulle preferenze dei clienti
+
+- [ ] **Dashboard Amministrazione AI**
+  - Creare interfaccia per la gestione dei prompt e configurazioni AI
+  - Implementare visualizzazioni analitiche sull'efficacia dell'AI
+  - Aggiungere strumenti per personalizzare il comportamento dell'AI per ogni ristorante
+
+### Gestione Redis e Slot Temporali
+
+- [ ] **Ottimizzazione Gestione Slot**
+
+  - Migliorare l'algoritmo di distribuzione degli slot temporali
+  - Implementare gestione dinamica della capacità in base al carico storico
+  - Aggiungere supporto per slot prioritari o prenotazioni anticipate
+
+- [ ] **Persistenza e Backup**
+
+  - Implementare sistema di backup periodico dei dati Redis
+  - Aggiungere meccanismi di ripristino in caso di errori
+  - Migliorare la persistenza dei dati per evitare perdite in caso di riavvio
+
+- [ ] **Monitoraggio e Allarmi**
+
+  - Implementare dashboard per monitorare l'utilizzo di Redis
+  - Aggiungere sistema di allarmi per situazioni critiche (sovraccarico, errori)
+  - Creare strumenti di diagnostica per problemi di performance
+
+- [ ] **Scaling Orizzontale**
+  - Preparare l'architettura Redis per lo scaling orizzontale
+  - Implementare clustering per gestire volumi elevati di dati
+  - Ottimizzare le query per ridurre il carico sul server
+
+### API e Backend
+
+- [ ] **Documentazione API**
+
+  - Generare documentazione API completa con Swagger/OpenAPI
+  - Aggiungere esempi di utilizzo per ogni endpoint
+  - Creare guide di integrazione per sviluppatori di terze parti
+
+- [ ] **Sicurezza e Rate Limiting**
+
+  - Implementare rate limiting avanzato per prevenire abusi
+  - Migliorare l'autenticazione e autorizzazione degli endpoint
+  - Aggiungere protezione contro attacchi comuni (CSRF, XSS, injection)
+
+- [ ] **Logging e Monitoraggio**
+
+  - Implementare sistema di logging strutturato per tracciare le richieste
+  - Aggiungere monitoraggio in tempo reale delle performance
+  - Creare dashboard per visualizzare metriche di sistema
+
+- [ ] **Ottimizzazione Performance**
+  - Implementare caching avanzato per ridurre il carico sul database
+  - Ottimizzare le query MongoDB per migliorare i tempi di risposta
+  - Implementare sistema di coda per operazioni pesanti o batch
+
 ## UI/UX Generale
 
 ### Tema Scuro
@@ -135,7 +249,19 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
   - Testare funzionalità di autenticazione
 
 - [ ] **Test End-to-End**
+
   - Implementare test E2E per flussi critici (creazione ristorante, ordini)
+
+- [ ] **Test delle Integrazioni AI**
+
+  - Creare suite di test per l'integrazione con DeepSeek
+  - Implementare test automatici per vari scenari di conversazione
+  - Misurare e migliorare l'accuratezza del riconoscimento degli ordini
+
+- [ ] **Load Testing**
+  - Eseguire test di carico per simulare picchi di utilizzo
+  - Identificare e risolvere bottleneck di performance
+  - Verificare la stabilità del sistema con più utenti contemporanei
 
 ## Infrastruttura
 
@@ -145,8 +271,20 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
   - Ottimizzare bundle size
 
 - [ ] **Logging e Monitoring**
+
   - Migliorare sistema di logging
   - Implementare tracking errori frontend
+
+- [ ] **Deployment e CI/CD**
+
+  - Configurare pipeline CI/CD completa
+  - Implementare rollback automatico in caso di errori
+  - Aggiungere test pre-deploy automatizzati
+
+- [ ] **Containerizzazione**
+  - Creare configurazione Docker per sviluppo e produzione
+  - Implementare orchestrazione con Kubernetes
+  - Ottimizzare immagini per ridurre dimensioni e tempi di avvio
 
 ---
 
@@ -155,11 +293,12 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
 1. Correggere pagine 404 esistenti (link "Modifica", "Gestisci Menu", "Visualizza Ordini")
 2. Implementare toggle per attivare/disattivare ristoranti
 3. Sviluppare funzionalità di gestione menu
-4. Implementare gestione ordini
-5. Aggiungere funzionalità di modifica orari
-6. Implementare modalità dark
-7. Funzionalità di eliminazione ristorante
-8. Miglioramenti UX e test
+4. Ottimizzare integrazione DeepSeek AI
+5. Implementare modalità dark
+6. Migliorare gestione slot temporali in Redis
+7. Implementare documentazione API
+8. Funzionalità di eliminazione ristorante
+9. Miglioramenti UX e test
 
 ## Note Tecniche
 
@@ -169,3 +308,6 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
 - Riutilizzare componenti dove possibile
 - Seguire pattern di gestione stato già stabiliti
 - Per funzionalità non coperte da shadcn, sviluppare componenti coerenti con il design system
+- Implementare logging strutturato per facilitare il debugging e l'analisi
+- Utilizzare sistemi di cache stratificati per ottimizzare le prestazioni
+- Adottare un approccio di continuous integration per ridurre i rischi di deployment

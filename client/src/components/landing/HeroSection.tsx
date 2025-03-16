@@ -41,8 +41,8 @@ export function HeroSection() {
 
             <p className="text-lg text-muted-foreground md:text-xl">
               Trasforma la tua pizzeria con un assistente AI intelligente che
-              risponde alle chiamate, prende gli ordini con precisione e aumenta
-              i tuoi profitti.
+              risponde alle chiamate, prende gli ordini con precisione per il
+              ritiro e ottimizza i tempi di preparazione.
             </p>
 
             <div className="flex flex-wrap gap-4">

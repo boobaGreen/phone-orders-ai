@@ -5,7 +5,7 @@ import {
   Clock,
   BarChart,
   Settings,
-  CreditCard,
+  Calendar,
   Users,
 } from "lucide-react";
 
@@ -49,9 +49,9 @@ export function FeaturesSection() {
     },
     {
       icon: <Clock className="h-6 w-6" />,
-      title: "Gestione Tempi",
+      title: "Gestione Ritiri",
       description:
-        "Ottimizzazione dei tempi di consegna e ritiro con fasce orarie personalizzabili.",
+        "Ottimizzazione dei tempi di preparazione e ritiro con fasce orarie personalizzabili.",
     },
     {
       icon: <BarChart className="h-6 w-6" />,
@@ -66,10 +66,10 @@ export function FeaturesSection() {
         "Aggiorna facilmente il tuo menu con prezzi, varianti e disponibilità in tempo reale.",
     },
     {
-      icon: <CreditCard className="h-6 w-6" />,
-      title: "Pagamenti Integrati",
+      icon: <Calendar className="h-6 w-6" />,
+      title: "Pianificazione Intelligente",
       description:
-        "Offri diverse opzioni di pagamento e gestisci facilmente le transazioni.",
+        "Organizza gli orari di ritiro per evitare congestioni e ottimizzare la preparazione.",
     },
     {
       icon: <Users className="h-6 w-6" />,

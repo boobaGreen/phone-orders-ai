@@ -112,6 +112,10 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
   - Aggiungere/rimuovere metodi di pagamento
   - Impostare metodo predefinito
   - Integrazione con gateway di pagamento (Stripe/PayPal)
+  - Implementare pagamenti ricorrenti per abbonamenti
+  - Aggiungere supporto per pagamenti una tantum
+  - Visualizzare storico delle transazioni
+  - Implementare notifiche per pagamenti falliti o in scadenza
 
 ### Pagina Impostazioni (`/settings`)
 
@@ -241,6 +245,71 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
   - Testare su varie dimensioni di schermo
   - Utilizzare Sheet di shadcn per menu mobili
 
+## Demo e Presentazione
+
+- [ ] **Demo nella Home Page**
+
+  - Aggiungere componente demo con numero Twilio da chiamare
+  - Implementare QR code per avviare la chiamata da mobile
+  - Creare video dimostrativo del funzionamento
+  - Aggiungere esempi di frasi da dire durante la chiamata
+
+- [ ] **Personalizzazione Twilio**
+  - Implementare sistema per assegnare numeri dedicati ai clienti premium
+  - Creare dashboard per visualizzare statistiche delle chiamate
+  - Implementare messaggi di benvenuto personalizzati per ogni business
+  - Aggiungere supporto multilingua per l'assistente AI
+
+## Note sull'Implementazione del Risponditore Twilio
+
+Per l'implementazione del risponditore telefonico con Twilio:
+
+- **Numeri di Telefono**:
+
+  - **Fase di sviluppo**: Utilizzeremo il numero USA Twilio (+19032703607) già attivato
+  - **Produzione**: Valutare l'acquisto di un numero italiano (+39) a $30/mese o includere questa opzione solo nei piani premium
+
+- **Strategia di Numerazione**:
+
+  - **Piano Base**: Numero condiviso con identificazione via businessId
+  - **Piano Premium**: Opzione per numero dedicato o porting del numero esistente del cliente
+
+- **Metodi di Identificazione Business**:
+
+  - **Metodo 1: Estensioni DTMF** (per compatibilità universale)
+
+    - Formato: `tel:+19032703607,123#` (la virgola crea pausa, 123 è l'ID business)
+    - Clienti chiamano e vengono identificati tramite toni DTMF automatici
+    - Compatibile con tutti i telefoni, anche vecchi modelli
+    - Esempio webhook: `https://your-webhook-url.com/api/call/incoming` con lettura DTMF
+
+  - **Metodo 2: Sottoindirizzi SIP** (più elegante)
+
+    - Formato: `tel:+19032703607;postd=123` (identificazione nei metadati)
+    - Nessun tono udibile durante la chiamata
+    - Identificazione istantanea senza attese
+    - Migliore esperienza utente ma richiede telefoni moderni
+    - Esempio webhook: `https://your-webhook-url.com/api/call/incoming-sip`
+
+  - **Implementazione**: Supportare entrambi i metodi per massima compatibilità
+    - Links: Formato SIP per app/web/QR
+    - Fallback: Richiesta DTMF per chiamate manuali senza identificazione
+
+- **Integrazione nei Ristoranti**:
+
+  - Generare QR code con formato appropriato per ogni ristorante
+  - Fornire widget per siti web con link telefonico pre-configurato
+  - Istruzioni su come salvare il numero in rubrica correttamente
+  - Preparare materiali esplicativi per clienti con esempi pratici
+
+- **Demo nella Home Page**:
+  - Aggiungere componente che mostra il numero demo da chiamare
+  - Implementare selettore di ristorante dimostrativo
+  - Generare QR code dinamici per ogni ristorante selezionato
+  - Specificare chiaramente che è un numero internazionale (solo per demo)
+  - Includere esempi di frasi da utilizzare per testare l'AI
+  - Mostrare spiegazione di entrambi i metodi di identificazione
+
 ## Testing e Quality Assurance
 
 - [ ] **Test Unitari**
@@ -290,15 +359,15 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
 
 ## Priorità e Pianificazione
 
-1. Correggere pagine 404 esistenti (link "Modifica", "Gestisci Menu", "Visualizza Ordini")
-2. Implementare toggle per attivare/disattivare ristoranti
-3. Sviluppare funzionalità di gestione menu
-4. Ottimizzare integrazione DeepSeek AI
-5. Implementare modalità dark
-6. Migliorare gestione slot temporali in Redis
-7. Implementare documentazione API
-8. Funzionalità di eliminazione ristorante
-9. Miglioramenti UX e test
+- Adottare un approccio di continuous integration per ridurre i rischi di deployment
+- Utilizzare sistemi di cache stratificati per ottimizzare le prestazioni
+- Implementare logging strutturato per facilitare il debugging e l'analisi
+- Per funzionalità non coperte da shadcn, sviluppare componenti coerenti con il design system
+- Seguire pattern di gestione stato già stabiliti
+- Riutilizzare componenti dove possibile
+- Mantenere la convenzione del progetto per variabili CSS e integrarle con il tema shadcn
+- Per nuovi componenti necessari, preferire l'installazione e la personalizzazione di quelli shadcn
+- **Utilizzare shadcn/ui come prima scelta** per tutti i componenti dell'interfaccia
 
 ## Note Tecniche
 

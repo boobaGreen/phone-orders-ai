@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 
-// Determina l'URL base dell'API in base all'ambiente
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3005/api";
+// Usa un URL relativo quando utilizzi il proxy di Vite
+const API_URL = "/api"; // oppure "http://localhost:3005/api"
 
 // Crea un'istanza di axios con la configurazione di base
 const api = axios.create({
@@ -12,16 +12,28 @@ const api = axios.create({
   },
 });
 
-// Interceptor per aggiungere il token di autenticazione
+// Versione pulita dell'interceptor
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const authStorage = localStorage.getItem("auth-storage");
+  let token = null;
+
+  if (authStorage) {
+    try {
+      const parsed = JSON.parse(authStorage);
+      token = parsed.state?.token;
+    } catch (e) {
+      console.error("Error parsing auth storage", e);
+    }
+  }
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
-// API endpoints
+// API endpoints - Auth
 export const authAPI = {
   register: (data: any) => api.post("/auth/register", data),
   login: (data: any) => api.post("/auth/login", data),
@@ -30,27 +42,46 @@ export const authAPI = {
     api.post("/auth/verify-supabase", { token }),
 };
 
+// API endpoints - Business (allineamento tra frontend e backend)
 export const businessAPI = {
-  getAll: () => api.get("/business"),
-  getById: (id: string) => api.get(`/business/${id}`),
-  create: (data: any) => api.post("/business", data),
-  update: (id: string, data: any) => api.put(`/business/${id}`, data),
-  delete: (id: string) => api.delete(`/business/${id}`),
-  getMenu: (id: string) => api.get(`/business/${id}/menu`),
-  createMenu: (id: string, data: any) => api.post(`/business/${id}/menu`, data),
-  updateMenu: (id: string, data: any) => api.put(`/business/${id}/menu`, data),
+  // Rinominati per allinearsi al backend
+  getBusinesses: () => api.get("/businesses"),
+  getBusiness: (id: string) => api.get(`/businesses/${id}`),
+  createBusiness: (data: any) => api.post("/businesses", data),
+  updateBusiness: (id: string, data: any) => api.put(`/businesses/${id}`, data),
+  deleteBusiness: (id: string) => api.delete(`/businesses/${id}`),
+
+  // Manteniamo anche i vecchi nomi per retrocompatibilità
+  getRestaurants: () => api.get("/businesses"),
+  getRestaurant: (id: string) => api.get(`/businesses/${id}`),
+  createRestaurant: (data: any) => api.post("/businesses", data),
+  updateRestaurant: (id: string, data: any) =>
+    api.put(`/businesses/${id}`, data),
+  deleteRestaurant: (id: string) => api.delete(`/businesses/${id}`),
+
+  // API Menu
+  getMenu: (businessId: string) => api.get(`/businesses/${businessId}/menu`),
+  createMenu: (businessId: string, data: any) =>
+    api.post(`/businesses/${businessId}/menu`, data),
+  updateMenu: (businessId: string, data: any) =>
+    api.put(`/businesses/${businessId}/menu`, data),
 };
 
+// API endpoints - Orders
 export const orderAPI = {
-  getAll: (params?: any) => api.get("/orders", { params }),
-  getById: (id: string) => api.get(`/orders/${id}`),
-  create: (data: any) => api.post("/orders", data),
-  update: (id: string, data: any) => api.put(`/orders/${id}`, data),
-  delete: (id: string) => api.delete(`/orders/${id}`),
-  checkSlotAvailability: (params: any) =>
-    api.get("/orders/slot/check", { params }),
-  getAvailableSlots: (params: any) =>
-    api.get("/orders/slot/available", { params }),
+  getOrders: (params?: any) => api.get("/orders", { params }),
+  getOrder: (id: string) => api.get(`/orders/${id}`),
+  createOrder: (data: any) => api.post("/orders", data),
+  updateOrder: (id: string, data: any) => api.put(`/orders/${id}`, data),
+  deleteOrder: (id: string) => api.delete(`/orders/${id}`),
+
+  // Endpoints per la disponibilità degli slot
+  getAvailableSlots: (businessId: string, date: string) =>
+    api.get(`/orders/slots?businessId=${businessId}&date=${date}`),
+  checkSlotAvailability: (businessId: string, date: string, time: string) =>
+    api.get(
+      `/orders/check-slot?businessId=${businessId}&date=${date}&time=${time}`
+    ),
 };
 
 export default api;

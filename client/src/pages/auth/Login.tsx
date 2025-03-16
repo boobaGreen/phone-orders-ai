@@ -49,10 +49,15 @@ const Login = () => {
     }
   };
 
-  // Login con Google
+  // Assicurati che la funzione handleGoogleLogin funzioni correttamente
   const handleGoogleLogin = async () => {
-    await loginWithGoogle();
-    // Il redirect verrà gestito da Supabase
+    try {
+      await loginWithGoogle(); // Dalla store Zustand
+      // Il redirect è gestito da Supabase
+    } catch (error) {
+      console.error("Google login error:", error);
+      setLoginError("Errore durante l'accesso con Google");
+    }
   };
 
   return (
@@ -112,6 +117,16 @@ const Login = () => {
             {isLoading ? "Accesso in corso..." : "Accedi"}
           </button>
         </form>
+
+        {/* Aggiungi questo link vicino al pulsante di login */}
+        <div className="text-center text-sm mt-4">
+          <Link
+            to="/auth/forgot-password"
+            className="font-medium text-[color:var(--color-primary)] hover:text-[color:var(--color-primary-dark)]"
+          >
+            Password dimenticata?
+          </Link>
+        </div>
 
         {/* Separatore */}
         <div className="relative my-6">

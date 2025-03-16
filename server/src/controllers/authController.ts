@@ -97,17 +97,37 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Trova l'utente nel nostro DB
     let user = await User.findOne({ supabaseId: supabaseUser.id });
 
-    // Se l'utente non esiste, crealo
-    if (!user) {
-      user = new User({
-        email: supabaseUser.email,
-        name:
-          supabaseUser.user_metadata?.name || supabaseUser.email?.split("@")[0],
-        supabaseId: supabaseUser.id,
-        subscriptionTier: SubscriptionTier.FREE,
-      });
+    // Se l'utente non esiste, verifica se esiste un utente con la stessa email
+    if (!user && supabaseUser.email) {
+      user = await User.findOne({ email: supabaseUser.email });
 
-      await user.save();
+      // Se esiste un utente con la stessa email ma senza supabaseId, aggiorna il record
+      if (user && !user.supabaseId) {
+        user.supabaseId = supabaseUser.id;
+        await user.save();
+      }
+      // Se non esiste un utente con questa email, crealo
+      else if (!user) {
+        user = new User({
+          email: supabaseUser.email,
+          name:
+            supabaseUser.user_metadata?.name ||
+            supabaseUser.email?.split("@")[0],
+          supabaseId: supabaseUser.id,
+          subscriptionTier: SubscriptionTier.FREE,
+        });
+
+        await user.save();
+      }
+    }
+
+    // Verifica che l'utente esista
+    if (!user) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to retrieve or create user",
+      });
+      return;
     }
 
     // Genera token JWT

@@ -6,7 +6,6 @@ import { authAPI } from "../services/api";
 import { signInWithGoogle, signOut } from "../services/supabase";
 
 interface AuthState {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   user: any | null;
   token: string | null;
   isAuthenticated: boolean;
@@ -34,18 +33,32 @@ export const useAuthStore = create<AuthState>()(
       login: async (supabaseToken: string) => {
         try {
           set({ isLoading: true, error: null });
+          console.log(
+            "Logging in with token:",
+            supabaseToken.substring(0, 10) + "..."
+          );
 
           const { data } = await authAPI.login({ supabaseToken });
+          console.log("Login response:", data);
 
-          set({
-            user: data.user,
-            token: data.token,
-            isAuthenticated: true,
-            isLoading: false,
-          });
+          if (data.token && data.user) {
+            console.log("Setting authenticated state");
+            set({
+              user: data.user,
+              token: data.token,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+          } else {
+            throw new Error("Invalid response from server");
+          }
         } catch (error: any) {
+          console.error("Login error:", error.response?.data || error);
           set({
-            error: error.response?.data?.message || "Error logging in",
+            error:
+              error.response?.data?.message ||
+              error.message ||
+              "Error logging in",
             isLoading: false,
           });
         }
@@ -58,7 +71,7 @@ export const useAuthStore = create<AuthState>()(
           const { error } = await signInWithGoogle();
 
           if (error) {
-            throw new Error(error.message);
+            throw new Error((error as { message: string }).message);
           }
 
           set({ isLoading: false });

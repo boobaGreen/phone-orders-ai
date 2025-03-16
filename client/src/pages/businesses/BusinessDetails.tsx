@@ -47,6 +47,7 @@ const BusinessDetails = () => {
               "Errore nel caricamento dei dettagli del ristorante"
           );
         }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Error fetching business details:", err);
         setError(

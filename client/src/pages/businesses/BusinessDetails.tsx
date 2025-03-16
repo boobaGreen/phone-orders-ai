@@ -47,7 +47,7 @@ const BusinessDetails = () => {
               "Errore nel caricamento dei dettagli del ristorante"
           );
         }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Error fetching business details:", err);
         setError(
@@ -105,13 +105,17 @@ const BusinessDetails = () => {
         <h1 className="text-2xl font-bold">{business.name}</h1>
         <div className="flex space-x-2">
           <button
-            onClick={() => navigate(`/businesses/${business._id}/menu`)}
+            onClick={() =>
+              navigate(`/dashboard/businesses/${business._id}/menu`)
+            }
             className="px-4 py-2 bg-[color:var(--color-primary)] text-[color:var(--color-primary-foreground)] rounded-md"
           >
             Gestisci Menu
           </button>
           <button
-            onClick={() => navigate(`/businesses/${business._id}/orders`)}
+            onClick={() =>
+              navigate(`/dashboard/businesses/${business._id}/orders`)
+            }
             className="px-4 py-2 border border-[color:var(--color-border)] rounded-md"
           >
             Visualizza Ordini
@@ -200,7 +204,7 @@ const BusinessDetails = () => {
           Torna alla Dashboard
         </button>
         <button
-          onClick={() => navigate(`/businesses/${business._id}/edit`)}
+          onClick={() => navigate(`/dashboard/businesses/${business._id}/edit`)}
           className="px-4 py-2 bg-[color:var(--color-primary)] text-[color:var(--color-primary-foreground)] rounded-md"
         >
           Modifica Informazioni

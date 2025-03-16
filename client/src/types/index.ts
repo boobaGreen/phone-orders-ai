@@ -62,7 +62,7 @@ export interface MenuItemOption {
 }
 
 export interface MenuItem {
-  _id: string;
+  _id?: string; // Rendi opzionale aggiungendo ?
   name: string;
   description: string;
   price: number;
@@ -73,13 +73,14 @@ export interface MenuItem {
 }
 
 export interface Menu {
-  _id: string;
+  _id?: string;
   businessId: string;
   name: string;
   items: MenuItem[];
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  categories?: string[];
 }
 
 // Order Types

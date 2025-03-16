@@ -1,61 +1,142 @@
-# Pizzeria SaaS - Sistema di Ordini Telefonici con AI
+# 🍕 Pizzeria SaaS - AI Phone Order System
 
-## Panoramica
+[![React](https://img.shields.io/badge/React-19-blue)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-green)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-Pizzeria SaaS è una piattaforma che permette alle pizzerie di gestire ordini telefonici tramite un assistente AI. Il sistema utilizza Twilio per gestire le chiamate telefoniche e un modello AI DeepSeek per conversare con i clienti, prendendo ordini in modo naturale.
+## 📋 Overview
 
-## Funzionalità Principali
+Pizzeria SaaS is a cutting-edge platform enabling pizzerias to automate telephone orders through an AI-powered assistant. The system leverages Twilio for call management and DeepSeek AI models to engage in natural conversations with customers, creating a seamless ordering experience.
 
-- 🍕 Gestione di menu personalizzabili per le pizzerie
-- 📞 Assistente telefonico AI per ricevere ordini
-- 📆 Sistema di prenotazione con fasce orarie
-- 📊 Dashboard per monitorare ordini e attività
-- 👤 Gestione multi-tenant con diversi piani di abbonamento
-- 🌙 Tema chiaro/scuro
+## ✨ Key Features
 
-## Tecnologie Utilizzate
+- 🍕 **Custom Menu Management** - Easily create and modify menu items with prices, variants, and modifiers
+- 📞 **AI Phone Assistant** - Handle customer calls with natural language processing
+- 📆 **Time Slot Reservation** - Manage delivery/pickup scheduling with customizable time slots
+- 📊 **Analytics Dashboard** - Monitor orders, peak times, and performance metrics
+- 👤 **Multi-tenant Architecture** - Subscription-based SaaS with different pricing tiers
+- 🌙 **Theme Switching** - Light/dark mode for optimal user experience
+- 🔔 **Real-time Notifications** - Stay informed about new orders and status changes
+- 🔒 **Secure Authentication** - Supabase Auth with JWT integration
 
-- **Frontend**: React 19, TypeScript, Vite 6, Tailwind CSS 4, Zustand, React Query
-- **Backend**: Node.js, Express, TypeScript, MongoDB, Redis
-- **AI**: DeepSeek API per l'elaborazione del linguaggio naturale
-- **Telefonia**: Twilio per la gestione delle chiamate
-- **Autenticazione**: Supabase Auth con integrazione JWT
+## 🛠️ Technology Stack
 
-## Struttura del Progetto
+### Frontend
+
+- **React 19** with TypeScript and Vite 6
+- **Tailwind CSS 4** for modern, responsive styling
+- **Zustand** for state management
+- **React Query** for data fetching and caching
+- **Shadcn UI** component library
+
+### Backend
+
+- **Node.js** with Express framework
+- **TypeScript** for type safety
+- **MongoDB** for primary database
+- **Redis** for caching and session management
+
+### Integrations
+
+- **DeepSeek AI** for natural language processing
+- **Twilio** for telephony services
+- **Supabase Auth** for authentication
+- **Stripe** for payment processing
+
+## 🗂️ Project Structure
 
 ```
 pizzeria-saas
-├── client
-│   ├── package.json         # Frontend dependencies
-│   ├── tsconfig.json
-│   └── src
-│       └── App.tsx
-├── server
-│   ├── package.json         # Backend dependencies
-│   ├── tsconfig.json
-│   └── src
-│       └── app.ts
-├── shared                   # Shared types/utilities
-│   └── types
-│       └── index.ts
-└── README.md
+├── client                   # Frontend application
+│   ├── public               # Static assets
+│   ├── src                  # Source code
+│   │   ├── components       # Reusable UI components
+│   │   ├── features         # Feature-specific components
+│   │   ├── hooks            # Custom React hooks
+│   │   ├── pages            # Application pages
+│   │   ├── services         # API services
+│   │   ├── store            # State management
+│   │   └── utils            # Utility functions
+│   └── ...
+├── server                   # Backend application
+│   ├── src                  # Source code
+│   │   ├── controllers      # Request handlers
+│   │   ├── models           # Database models
+│   │   ├── routes           # API routes
+│   │   ├── services         # Business logic
+│   │   └── utils            # Utility functions
+│   └── ...
+├── shared                   # Shared code between frontend and backend
+│   └── types                # TypeScript type definitions
+└── ...
 ```
 
-## Getting Started
+## 🚀 Getting Started
 
-1. Clone the repository.
-2. Install dependencies for both server and client:
-   - Navigate to the `server` directory and run `npm install`.
-   - Navigate to the `client` directory and run `npm install`.
-3. Set up environment variables for database connection and API keys.
-4. Start the server and client applications.
+### Prerequisites
 
-## Future Enhancements
+- Node.js (v18+)
+- MongoDB
+- Redis
+- Twilio account
+- DeepSeek API key
+- Supabase account
 
-- Mobile app development for iOS and Android.
-- Additional features for managing subscriptions and pricing tiers.
-- Enhanced AI capabilities for better user interaction.
+### Installation
 
-## License
+1. **Clone the repository**
 
-This project is licensed under the MIT License.
+   ```bash
+   git clone https://github.com/your-username/pizzeria-saas.git
+   cd pizzeria-saas
+   ```
+
+2. **Set up environment variables**
+
+   - Create `.env` files in both client and server directories based on provided examples
+
+3. **Install server dependencies**
+
+   ```bash
+   cd server
+   npm install
+   ```
+
+4. **Install client dependencies**
+
+   ```bash
+   cd ../client
+   npm install
+   ```
+
+5. **Start development servers**
+
+   For the backend:
+
+   ```bash
+   cd ../server
+   npm run dev
+   ```
+
+   For the frontend:
+
+   ```bash
+   cd ../client
+   npm run dev
+   ```
+
+## 💡 Development Guidelines
+
+- Follow the established coding standards and file organization
+- Write tests for all new features
+- Use conventional commit messages
+- Create feature branches from `develop` branch
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 📬 Contact
+
+For questions or support, reach out to the development team at [your-email@example.com](mailto:your-email@example.com).

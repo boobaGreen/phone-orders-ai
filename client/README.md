@@ -1,54 +1,95 @@
-# React + TypeScript + Vite
+# Pizzeria SaaS - Frontend Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This directory contains the frontend React application for the Pizzeria SaaS platform.
 
-Currently, two official plugins are available:
+## 🛠️ Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 19** - Latest React features with improved performance
+- **TypeScript** - For type safety and better developer experience
+- **Vite 6** - Next-generation frontend tooling
+- **Tailwind CSS 4** - Utility-first CSS framework
+- **Zustand** - Lightweight state management
+- **React Query** - Data fetching and state management
+- **Shadcn UI** - Beautifully designed components
+- **React Router** - Client-side routing
 
-## Expanding the ESLint configuration
+## 🏗️ Architecture
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The frontend follows a feature-based architecture:
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```
+src/
+├── components/       # Reusable UI components
+├── features/         # Feature-specific modules
+├── pages/            # Route components
+├── hooks/            # Custom React hooks
+├── services/         # API service layer
+├── store/            # Zustand state stores
+├── utils/            # Helper functions
+├── types/            # TypeScript type definitions
+├── styles/           # Global styles
+├── App.tsx           # Main application component
+└── main.tsx          # Entry point
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 Getting Started
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerequisites
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+- Node.js (v18+)
+- npm or yarn
+
+### Development
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Set up environment variables:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Then edit `.env.local` with your configuration.
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+   This will start the app at http://localhost:5173
+
+### Building for Production
+
+```bash
+npm run build
 ```
+
+The built files will be in the `dist` directory.
+
+## 📝 Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+- `npm run type-check` - Check TypeScript types
+
+## 🧪 Testing
+
+```bash
+npm run test
+```
+
+## 📚 Learn More
+
+For more information about the technologies used:
+
+- [React Documentation](https://reactjs.org/)
+- [TypeScript Documentation](https://www.typescriptlang.org/)
+- [Vite Documentation](https://vitejs.dev/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
+- [Zustand Documentation](https://github.com/pmndrs/zustand)
+- [React Query Documentation](https://tanstack.com/query/latest)

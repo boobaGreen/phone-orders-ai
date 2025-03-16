@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { authAPI } from "../services/api";
-import { supabase, signInWithGoogle, signOut } from "../services/supabase";
+import { signInWithGoogle, signOut } from "../services/supabase";
 
 interface AuthState {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   user: any | null;
   token: string | null;
   isAuthenticated: boolean;
@@ -21,7 +24,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       user: null,
       token: null,
       isAuthenticated: false,

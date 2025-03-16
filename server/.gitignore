@@ -1,0 +1,40 @@
+# Dependency directories
+node_modules/
+
+# Build directory
+/dist
+/build
+/lib
+
+# Coverage directory
+/coverage
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Log files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+/tmp
+/temp
+
+# TS compiled files
+*.tsbuildinfo
+
+# Debug
+.nyc_output/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store

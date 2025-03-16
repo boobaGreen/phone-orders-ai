@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colori principali */
+  --color-primary: oklch(0.6 0.2 230); /* Blu pizzeria */
+  --color-primary-foreground: oklch(0.98 0.005 250);
+
+  --color-secondary: oklch(0.65 0.3 30); /* Arancione/rosso per accenti */
+  --color-secondary-foreground: oklch(0.98 0.005 250);
+
+  /* Colori di background e testo */
+  --color-background: oklch(0.98 0.005 250);
+  --color-foreground: oklch(0.2 0.02 240);
+
+  /* Card e bordi */
+  --color-card: oklch(0.99 0.01 250);
+  --color-card-foreground: oklch(0.2 0.02 240);
+  --color-border: oklch(0.85 0.02 250);
+
+  /* Input e form */
+  --color-input: oklch(0.85 0.02 250);
+  --color-input-foreground: oklch(0.2 0.02 240);
+
+  /* Elementi attenuati */
+  --color-muted: oklch(0.95 0.01 250);
+  --color-muted-foreground: oklch(0.5 0.02 250);
+
+  /* Colori di stato */
+  --color-success: oklch(0.65 0.15 140); /* Verde */
+  --color-success-foreground: oklch(0.98 0.005 250);
+
+  --color-warning: oklch(0.7 0.2 85); /* Ambra */
+  --color-warning-foreground: oklch(0.2 0.02 240);
+
+  --color-destructive: oklch(0.65 0.25 25); /* Rosso */
+  --color-destructive-foreground: oklch(0.98 0.005 250);
+}
+
+/* Tema scuro */
+.dark {
+  --color-primary: oklch(0.5 0.2 230); /* Blu pizzeria più scuro */
+  --color-primary-foreground: oklch(0.98 0.005 250);
+
+  --color-secondary: oklch(0.6 0.3 30); /* Arancione/rosso più scuro */
+  --color-secondary-foreground: oklch(0.98 0.005 250);
+
+  --color-background: oklch(0.12 0.02 240);
+  --color-foreground: oklch(0.98 0.005 250);
+
+  --color-card: oklch(0.15 0.02 240);
+  --color-card-foreground: oklch(0.95 0.005 250);
+  --color-border: oklch(0.25 0.02 240);
+
+  --color-input: oklch(0.25 0.02 240);
+  --color-input-foreground: oklch(0.95 0.005 250);
+
+  --color-muted: oklch(0.2 0.01 240);
+  --color-muted-foreground: oklch(0.7 0.02 250);
+
+  --color-success: oklch(0.5 0.15 140); /* Verde più scuro */
+  --color-success-foreground: oklch(0.98 0.005 250);
+
+  --color-warning: oklch(0.6 0.2 85); /* Ambra più scura */
+  --color-warning-foreground: oklch(0.98 0.005 250);
+
+  --color-destructive: oklch(0.5 0.25 25); /* Rosso più scuro */
+  --color-destructive-foreground: oklch(0.98 0.005 250);
+}
+
+/* Transizioni */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
+}
+/* Reset margin/padding to avoid unwanted borders */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Force overflow to hidden to prevent scrollbars when not needed */
+body {
+  overflow-x: hidden;
+}

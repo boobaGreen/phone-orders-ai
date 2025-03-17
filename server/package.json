@@ -30,7 +30,8 @@
     "mongoose": "^8.12.1",
     "redis": "^4.7.0",
     "twilio": "^5.5.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "vosk": "^0.3.39"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

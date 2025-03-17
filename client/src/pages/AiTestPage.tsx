@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef, useEffect } from "react";
 import { Button } from "../components/ui/button";
 import {
@@ -22,6 +23,14 @@ interface OrderItem {
   quantity: number;
 }
 
+// Add these declarations for Web Speech API
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 export default function AiTestPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [inputText, setInputText] = useState("");
@@ -34,11 +43,14 @@ export default function AiTestPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
+  const [isVoskReady, setIsVoskReady] = useState(false);
+  const [, setLoadingMessage] = useState("");
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -49,50 +61,130 @@ export default function AiTestPage() {
   useEffect(() => {
     return () => {
       if (streamRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
     };
+  }, []);
+
+  // Check Vosk status
+  useEffect(() => {
+    const checkVoskStatus = async () => {
+      try {
+        const response = await axios.get("/api/ai-test/vosk-status");
+        const { ready, downloadProgress } = response.data;
+
+        setIsVoskReady(ready);
+        if (!ready && downloadProgress < 100) {
+          setLoadingMessage(
+            `Preparazione modello vocale: ${downloadProgress}%`
+          );
+        } else if (!ready) {
+          setLoadingMessage("Inizializzazione modello vocale...");
+        } else {
+          setLoadingMessage("");
+        }
+      } catch (error) {
+        console.error("Errore nel controllo dello stato di Vosk:", error);
+      }
+    };
+
+    checkVoskStatus();
+    const interval = setInterval(checkVoskStatus, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   // Funzione per avviare/fermare la registrazione
   const toggleRecording = async () => {
     if (isRecording) {
-      mediaRecorderRef.current?.stop();
+      // Stop recording
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      } else if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
+      }
       setIsRecording(false);
     } else {
       try {
-        // Clean up any existing stream first
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => track.stop());
-        }
+        // Check if SpeechRecognition is available
+        if (
+          "webkitSpeechRecognition" in window ||
+          "SpeechRecognition" in window
+        ) {
+          // Use browser's speech recognition (Chrome/Edge)
+          const SpeechRecognition =
+            window.SpeechRecognition || window.webkitSpeechRecognition;
+          const recognition = new SpeechRecognition();
+          recognitionRef.current = recognition;
 
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        streamRef.current = stream;
+          // Configure recognition
+          recognition.lang = "it-IT";
+          recognition.continuous = false;
+          recognition.interimResults = false;
 
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
-        audioChunksRef.current = [];
+          // Handle results
+          recognition.onresult = (event: {
+            results: { transcript: any }[][];
+          }) => {
+            const transcript = event.results[0][0].transcript;
+            handleTranscription(transcript);
+          };
 
-        mediaRecorder.ondataavailable = (e) => {
-          audioChunksRef.current.push(e.data);
-        };
+          // Handle errors and end
+          recognition.onerror = (event: { error: any }) => {
+            console.error("Errore nel riconoscimento vocale:", event.error);
+            setIsRecording(false);
+          };
 
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, {
-            type: "audio/wav",
-          });
-          processAudio(audioBlob);
+          recognition.onend = () => {
+            setIsRecording(false);
+          };
 
-          // Stop tracks after processing to release the microphone
+          // Start recording
+          recognition.start();
+          setIsRecording(true);
+        } else {
+          // Fallback per Firefox: registra audio e invialo al server
+          console.log(
+            "Web Speech API not supported, using MediaRecorder fallback"
+          );
+
+          // Clean up existing stream if any
           if (streamRef.current) {
             streamRef.current.getTracks().forEach((track) => track.stop());
           }
-        };
 
-        mediaRecorder.start();
-        setIsRecording(true);
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          streamRef.current = stream;
+
+          const mediaRecorder = new MediaRecorder(stream);
+          mediaRecorderRef.current = mediaRecorder;
+          audioChunksRef.current = [];
+
+          mediaRecorder.ondataavailable = (e) => {
+            audioChunksRef.current.push(e.data);
+          };
+
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunksRef.current, {
+              type: "audio/wav",
+            });
+            processAudio(audioBlob);
+
+            // Stop tracks after processing
+            if (streamRef.current) {
+              streamRef.current.getTracks().forEach((track) => track.stop());
+            }
+          };
+
+          mediaRecorder.start();
+          setIsRecording(true);
+        }
       } catch (err) {
         console.error("Errore nell'accesso al microfono:", err);
         alert(
@@ -102,29 +194,17 @@ export default function AiTestPage() {
     }
   };
 
-  const processAudio = async (audioBlob: Blob) => {
+  const handleTranscription = async (transcript: string) => {
     setIsLoading(true);
 
+    // Show the transcript immediately
+    setMessages((prev) => [...prev, { role: "user", content: transcript }]);
+
     try {
-      const audioFile = new File([audioBlob], "recording.wav", {
-        type: "audio/wav",
+      const response = await axios.post("/api/ai-test/process-text", {
+        text: transcript,
+        conversationId,
       });
-
-      const formData = new FormData();
-      formData.append("audio", audioFile);
-      if (conversationId) {
-        formData.append("conversationId", conversationId);
-      }
-
-      const response = await axios.post(
-        "/api/ai-test/process-audio",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
 
       const {
         aiResponse,
@@ -139,7 +219,57 @@ export default function AiTestPage() {
       setCurrentOrder(newOrder || []);
       setMessages((prev) => [
         ...prev,
-        { role: "user", content: "Audio: <registrazione vocale>" },
+        { role: "assistant", content: aiResponse },
+      ]);
+    } catch (err) {
+      console.error("Errore nell'elaborazione del testo:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "system",
+          content:
+            "Si è verificato un errore nell'elaborazione del messaggio. Riprova.",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Modifica la funzione processAudio per usare l'URL completo del backend
+  async function processAudio(audioBlob: Blob) {
+    try {
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "recording.wav");
+      formData.append("conversationId", conversationId || "new");
+
+      // MODIFICA QUI: Usa l'URL completo del backend
+      const response = await axios.post(
+        "http://localhost:3005/api/ai-test/audio",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const {
+        aiResponse,
+        transcript,
+        conversationId: newConversationId,
+        currentOrder: newOrder,
+      } = response.data;
+
+      if (!conversationId) {
+        setConversationId(newConversationId);
+      }
+
+      setCurrentOrder(newOrder || []);
+      setMessages((prev) => [
+        ...prev,
+        // Mostra ciò che è stato trascritto
+        { role: "user", content: transcript },
         { role: "assistant", content: aiResponse },
       ]);
     } catch (err) {
@@ -155,7 +285,7 @@ export default function AiTestPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   const handleSendText = async () => {
     if (!inputText.trim()) return;
@@ -237,8 +367,11 @@ export default function AiTestPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-grow overflow-hidden flex flex-col">
-              <ScrollArea className="flex-grow pr-4">
-                <div className="space-y-4">
+              {/* Modifiche qui per migliorare lo scroll */}
+              <ScrollArea className="flex-grow pr-4 h-[370px]">
+                {" "}
+                {/* Altezza specifica per garantire lo scroll */}
+                <div className="space-y-4 pb-2">
                   {messages.map((msg, idx) => (
                     <div
                       key={idx}
@@ -263,24 +396,55 @@ export default function AiTestPage() {
               </ScrollArea>
 
               <div className="mt-4 flex gap-2">
-                <Textarea
-                  placeholder="Scrivi il tuo messaggio qui..."
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && inputText.trim()) {
-                      e.preventDefault();
-                      handleSendText();
-                    }
-                  }}
-                  className="flex-grow"
-                />
+                <div className="flex-grow relative">
+                  <Textarea
+                    placeholder="Scrivi il tuo messaggio qui..."
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === "Enter" &&
+                        !e.shiftKey &&
+                        inputText.trim()
+                      ) {
+                        e.preventDefault();
+                        handleSendText();
+                      }
+                    }}
+                    className="w-full min-h-[120px] max-h-[300px] overflow-auto"
+                    rows={5}
+                    style={{
+                      resize: "vertical",
+                      lineHeight: "1.5",
+                      padding: "12px 16px",
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "rgba(0,0,0,0.2) transparent",
+                    }}
+                  />
+                  {/* Aggiungi un indicatore di focus per migliorare l'accessibilità */}
+                  <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
+                    {inputText.length > 0
+                      ? `${inputText.length} caratteri`
+                      : ""}
+                  </div>
+                </div>
+
                 <div className="flex flex-col gap-2">
+                  {!isVoskReady && (
+                    <div className="text-amber-500 mb-2 text-xs bg-amber-50 p-2 rounded-md border border-amber-200 flex items-center">
+                      <span className="animate-spin mr-2">⚙️</span>
+                      Preparazione modello vocale in corso...
+                      <span className="animate-pulse ml-1">...</span>
+                    </div>
+                  )}
                   <Button
                     onClick={toggleRecording}
                     variant={isRecording ? "destructive" : "outline"}
                     size="icon"
-                    disabled={isLoading}
+                    disabled={isLoading || !isVoskReady}
+                    title={
+                      isRecording ? "Ferma registrazione" : "Registra audio"
+                    }
                   >
                     {isRecording ? (
                       <MicOff className="h-4 w-4" />
@@ -292,6 +456,7 @@ export default function AiTestPage() {
                     onClick={handleSendText}
                     disabled={isLoading || !inputText.trim()}
                     size="icon"
+                    title="Invia messaggio"
                   >
                     <Send className="h-4 w-4" />
                   </Button>

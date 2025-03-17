@@ -18,7 +18,7 @@ export const config = {
   },
   deepSeek: {
     apiKey: process.env.DEEPSEEK_API_KEY,
-    endpoint: process.env.DEEPSEEK_ENDPOINT || "https://api.deepseek.com/v1",
+    endpoint: process.env.DEEPSEEK_API_URL || "https://api.deepseek.com/v1",
     model: process.env.DEEPSEEK_MODEL || "deepseek-chat",
   },
   supabase: {
@@ -28,5 +28,9 @@ export const config = {
   jwt: {
     secret: process.env.JWT_SECRET || "your-secret-key",
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  },
+  vosk: {
+    modelPath:
+      process.env.VOSK_MODEL_PATH || "./models/vosk-model-small-it-0.22",
   },
 };

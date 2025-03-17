@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import aiService from "../services/aiService";
+import transcriptionService from "../services/transcriptionService";
 
 // Dati hardcodati del ristorante per i test
 const testRestaurant = {
@@ -105,13 +106,13 @@ export const processAudio = async (
   res: Response
 ): Promise<void> => {
   try {
-    // Update to use the correct formidable v3+ API
+    // Configura formidable per l'upload del file
     const form = formidable({
-      maxFileSize: 10 * 1024 * 1024, // 10MB limit
+      maxFileSize: 10 * 1024 * 1024, // 10MB limite
       keepExtensions: true,
     });
 
-    // Parse the form using v3+ API with proper typing
+    // Parsing del form
     const [fields, files] = await new Promise<
       [formidable.Fields, formidable.Files]
     >((resolve, reject) => {
@@ -124,30 +125,57 @@ export const processAudio = async (
     console.log("Form fields:", fields);
     console.log("Form files:", files);
 
-    // Handle both formidable v3+ file format
+    // Ottieni il file audio
     const audioFile =
       files.audio &&
       (Array.isArray(files.audio) ? files.audio[0] : files.audio);
+
+    // Ottieni l'ID della conversazione o crea uno nuovo
     const conversationId =
-      fields.conversationId &&
-      (Array.isArray(fields.conversationId)
-        ? fields.conversationId[0]
-        : String(fields.conversationId));
+      (fields.conversationId &&
+        (Array.isArray(fields.conversationId)
+          ? fields.conversationId[0]
+          : String(fields.conversationId))) ||
+      uuidv4();
 
     if (!audioFile) {
       res.status(400).json({ error: "Nessun file audio fornito" });
       return;
     }
 
-    // Simulate transcription
-    const simulatedTranscript = "Vorrei ordinare una pizza margherita";
+    // Ottieni il percorso del file audio
+    const audioPath = audioFile.filepath || (audioFile as any).path;
+    const audioSize = audioFile.size;
+    const audioType = audioFile.mimetype || (audioFile as any).type;
 
-    // Use the configured conversation ID or create a new one
-    const finalConversationId = conversationId || uuidv4();
+    console.log(
+      `Audio received: ${audioPath}, Size: ${audioSize}, Type: ${audioType}`
+    );
 
-    // Retrieve or initialize the conversation
-    if (!conversations.has(finalConversationId)) {
-      conversations.set(finalConversationId, {
+    // Log dettagliato
+    console.log("---------- TRASCRIZIONE AUDIO ----------");
+    console.log(`Audio ricevuto: ${audioPath}, Dimensione: ${audioSize} byte`);
+
+    // Usa il servizio di trascrizione per convertire l'audio in testo
+    let transcript;
+    try {
+      transcript = await transcriptionService.transcribeAudio(audioPath);
+      console.log(`Trascrizione ottenuta: "${transcript}"`);
+
+      if (!transcript || transcript.trim().length === 0) {
+        console.log("Trascrizione vuota, usando fallback");
+        transcript =
+          "Non sono riuscito a comprendere l'audio, potresti ripetere?";
+      }
+    } catch (error) {
+      console.error("Error during transcription:", error);
+      transcript =
+        "Non sono riuscito a comprendere l'audio, potresti ripetere?";
+    }
+
+    // Recupera o inizializza la conversazione
+    if (!conversations.has(conversationId)) {
+      conversations.set(conversationId, {
         messages: [
           {
             role: "system",
@@ -164,40 +192,47 @@ export const processAudio = async (
       });
     }
 
-    const conversation = conversations.get(finalConversationId);
+    const conversation = conversations.get(conversationId);
 
-    // Add user message (transcript) to conversation
+    // Aggiungi la trascrizione come messaggio dell'utente
     conversation.messages.push({
       role: "user",
-      content: simulatedTranscript,
+      content: transcript,
     });
 
-    // Get AI response (in production) or use a placeholder for testing
+    // Ottieni la risposta dall'AI
     let aiResponse;
     try {
       aiResponse = await aiService.generateResponse(conversation.messages);
     } catch (aiError) {
-      console.error("Error calling AI service:", aiError);
+      console.error("Errore nel servizio AI:", aiError);
       aiResponse =
-        "Certo! Una pizza margherita. Vuoi aggiungere altro al tuo ordine?";
+        "Mi dispiace, sto riscontrando problemi tecnici. Come posso aiutarti con il tuo ordine?";
     }
 
-    // Add response to conversation
+    // Aggiungi la risposta dell'AI alla conversazione
     conversation.messages.push({
       role: "assistant",
       content: aiResponse,
     });
 
-    // Extract order information
-    extractOrderInfo(simulatedTranscript, conversation.orderItems);
+    // Estrai le informazioni sull'ordine
+    extractOrderInfo(transcript, conversation.orderItems);
 
-    // Return response
+    // Invia la risposta
     res.status(200).json({
-      conversationId: finalConversationId,
-      transcript: simulatedTranscript,
+      conversationId,
+      transcript,
       aiResponse,
       currentOrder: conversation.orderItems,
     });
+
+    // Pulisci il file temporaneo dopo l'uso
+    try {
+      fs.unlinkSync(audioPath);
+    } catch (unlinkError) {
+      console.error("Errore nella pulizia del file temporaneo:", unlinkError);
+    }
   } catch (error) {
     console.error("Errore nell'elaborazione dell'audio:", error);
     res.status(500).json({
@@ -239,3 +274,6 @@ export const resetConversation = (req: Request, res: Response): void => {
 };
 
 export default { processText, processAudio, resetConversation };
+export function chat(arg0: string, chat: any) {
+  throw new Error("Function not implemented.");
+}

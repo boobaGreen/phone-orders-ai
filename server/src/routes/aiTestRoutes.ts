@@ -1,13 +1,19 @@
-import { Router } from "express";
-import aiTestController from "../controllers/aiTestController";
+import express, { Request, Response } from "express";
+import * as aiTestController from "../controllers/aiTestController";
+import transcriptionService from "../services/transcriptionService";
 
-const router = Router();
+const router = express.Router();
 
-router.post("/process-text", aiTestController.processText);
-router.post("/process-audio", aiTestController.processAudio);
-router.delete(
-  "/conversation/:conversationId",
-  aiTestController.resetConversation
-);
+// Route esistenti
+router.post("/chat", aiTestController.chat);
+router.post("/audio", aiTestController.processAudio);
+router.post("/reset", aiTestController.resetConversation);
+
+// Aggiungi questa nuova route per lo stato di Vosk
+router.get("/vosk-status", (req: Request, res: Response) => {
+  // Ottieni lo stato del servizio di trascrizione
+  const status = transcriptionService.getStatus();
+  res.json(status);
+});
 
 export default router;

@@ -3,6 +3,7 @@ import authRoutes from "./authRoutes";
 import businessRoutes from "./businessRoutes";
 import orderRoutes from "./orderRoutes";
 import callRoutes from "./callRoutes";
+import aiTestRoutes from "./aiTestRoutes";
 
 const router = Router();
 
@@ -21,6 +22,9 @@ console.log("[ROUTES] Route /orders registrate");
 
 router.use("/call", callRoutes);
 console.log("[ROUTES] Route /call registrate");
+
+router.use("/ai-test", aiTestRoutes);
+console.log("[ROUTES] Route /ai-test registrate");
 
 // Aggiungi una route di test
 router.get("/test", (req, res) => {

@@ -54,10 +54,10 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
   - Mostrare errori appropriati se non è possibile eliminare
   - Utilizzare Dialog di shadcn per la conferma
 
-- [ ] **Gestione Stato di Attività**
+- [x] **Gestione Stato di Attività**
 
-  - Aggiungere toggle per attivare/disattivare un ristorante (usare Switch di shadcn)
-  - Implementare la logica di back-end per aggiornare lo stato `isActive`
+  - ✅ Aggiungere toggle per attivare/disattivare un ristorante (usare Switch di shadcn)
+  - ✅ Implementare la logica di back-end per aggiornare lo stato `isActive`
 
 - [ ] **Modifica Informazioni**
   - Correggere link "Modifica Informazioni" (attualmente porta a 404)
@@ -73,13 +73,13 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
   - Opzione 2: Creare modale dedicata per la modifica degli orari
   - Utilizzare TimePicker di shadcn quando disponibile
 
-- [ ] **Menu Management**
+- [x] **Menu Management**
 
-  - Sviluppare pagina "Gestisci Menu" (`/businesses/:id/menu`)
-  - Implementare CRUD per categorie di prodotti
-  - Implementare CRUD per singoli prodotti
-  - Gestire prezzi e varianti
-  - Utilizzare Card, Accordion e Sheet di shadcn
+  - ✅ Sviluppare pagina "Gestisci Menu" (`/businesses/:id/menu`)
+  - ✅ Implementare CRUD per categorie di prodotti
+  - ✅ Implementare CRUD per singoli prodotti
+  - ✅ Gestire prezzi e varianti
+  - ✅ Utilizzare Card, Accordion e Sheet di shadcn
 
 - [ ] **Ordini**
   - Sviluppare pagina "Visualizza Ordini" (`/businesses/:id/orders`)
@@ -225,12 +225,12 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
 
 ### Tema Scuro
 
-- [ ] **Implementare Modalità Dark**
-  - Aggiungere variabili CSS per tema scuro in `index.css`
-  - Implementare toggle per cambiare tema (usare ModeToggle di shadcn)
-  - Salvare preferenza utente in localStorage
-  - Rispettare preferenze di sistema (prefers-color-scheme)
-  - Configurare correttamente il tema in shadcn
+- [x] **Implementare Modalità Dark**
+  - ✅ Aggiungere variabili CSS per tema scuro in `index.css`
+  - ✅ Implementare toggle per cambiare tema (usare ModeToggle di shadcn)
+  - ✅ Salvare preferenza utente in localStorage
+  - ✅ Rispettare preferenze di sistema (prefers-color-scheme)
+  - ✅ Configurare correttamente il tema in shadcn
 
 ### Miglioramenti UX
 

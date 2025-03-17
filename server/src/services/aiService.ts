@@ -26,7 +26,10 @@ export class AIService {
     this.model = config.deepSeek.model;
   }
 
-  async generateResponse(messages: Message[]): Promise<string> {
+  // Verifica che questo metodo sia disponibile o implementalo
+  async generateResponse(messages: Array<{ role: string; content: string }>) {
+    // Implementazione esistente o nuova implementazione
+    // che invia i messaggi all'API DeepSeek e restituisce la risposta
     try {
       const response = await axios.post<DeepSeekResponse>(
         `${this.endpoint}/chat/completions`,

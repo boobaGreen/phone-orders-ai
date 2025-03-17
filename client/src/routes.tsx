@@ -17,6 +17,7 @@ import NewRestaurant from "./pages/restaurants/NewRestaurant";
 import BusinessDetails from "./pages/businesses/BusinessDetails";
 import LandingPage from "./pages/LandingPage";
 import BusinessMenuPage from "./pages/businesses/BusinessMenuPage";
+import AiTestPage from "./pages/AiTestPage";
 
 // Auth guard
 import AuthGuard from "./components/auth/AuthGuard";
@@ -32,6 +33,11 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <LandingPage />,
+      },
+      // Aggiungiamo la route pubblica per il test AI
+      {
+        path: "ai-test",
+        element: <AiTestPage />,
       },
       // Altre pagine pubbliche (about, contatti, ecc.)
     ],

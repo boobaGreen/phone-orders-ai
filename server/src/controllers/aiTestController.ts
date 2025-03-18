@@ -172,12 +172,16 @@ function extractOrderFromAIResponse(aiResponse: string): any[] {
   }
 }
 
+// Verifica che questi due handler siano implementati correttamente
 export const processText = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
     const { text, conversationId = uuidv4() } = req.body;
+
+    // Log di debug
+    console.log(`Processing text: "${text}"`, { conversationId });
 
     // Recupera o inizializza la conversazione
     if (!conversations.has(conversationId)) {
@@ -264,7 +268,7 @@ Questo JSON deve essere invisibile per il cliente, non menzionarlo mai nel testo
   }
 };
 
-export const processAudio = async (
+export const handleAudioUpload = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -437,6 +441,55 @@ Questo JSON deve essere invisibile per il cliente, non menzionarlo mai nel testo
   }
 };
 
+// Aggiungi questa implementazione se manca
+export const handleAudioBase64 = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { audio, conversationId } = req.body;
+
+    if (!audio) {
+      res.status(400).json({ error: "No audio data provided" });
+      return;
+    }
+
+    // Converti da base64 a buffer
+    const audioBuffer = Buffer.from(audio, "base64");
+
+    // Salva temporaneamente il file
+    const tempFilePath = path.join(
+      __dirname,
+      "../../uploads",
+      `${Date.now()}.wav`
+    );
+    fs.writeFileSync(tempFilePath, audioBuffer);
+
+    // Trascrivi l'audio usando il servizio
+    const transcript = await transcriptionService.transcribeAudio(
+      tempFilePath
+    );
+
+    // Elimina il file temporaneo
+    fs.unlinkSync(tempFilePath);
+
+    // Processa la trascrizione come faresti normalmente
+
+    // Il resto della tua logica di elaborazione con la trascrizione...
+    // ...
+
+    res.json({
+      transcript,
+      aiResponse: "Risposta processata con successo",
+      conversationId: "some-conversation-id", // Sostituisci con l'ID reale
+      currentOrder: [], // Sostituisci con l'ordine reale
+    });
+  } catch (error) {
+    console.error("Error processing audio base64:", error);
+    res.status(500).json({ error: "Failed to process audio" });
+  }
+};
+
 export const resetConversation = (req: Request, res: Response): void => {
   const { conversationId } = req.params;
 
@@ -455,7 +508,13 @@ export const getMenu = (req: Request, res: Response): void => {
   });
 };
 
-export default { processText, processAudio, resetConversation, getMenu };
+export default {
+  processText,
+  handleAudioUpload,
+  resetConversation,
+  getMenu,
+  handleAudioBase64,
+};
 export function chat(arg0: string, chat: any) {
   throw new Error("Function not implemented.");
 }

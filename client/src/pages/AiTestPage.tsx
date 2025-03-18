@@ -376,10 +376,21 @@ export default function AiTestPage() {
     setInputText("");
 
     try {
+      console.log("Sending text message:", userMessage);
+      console.log("Conversation ID:", conversationId);
+
+      // Log della richiesta che stiamo per inviare
+      console.log(
+        "Sending request to:",
+        api.defaults.baseURL + "/ai-test/process-text"
+      );
+
       const response = await api.post("/ai-test/process-text", {
         text: userMessage,
         conversationId,
       });
+
+      console.log("Text processing response:", response.data);
 
       const {
         aiResponse,
@@ -396,8 +407,14 @@ export default function AiTestPage() {
         ...prev,
         { role: "assistant", content: aiResponse },
       ]);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Errore nell'elaborazione del testo:", err);
+      // Log dettagliato dell'errore
+      if (err.response) {
+        console.error("Server response:", err.response.data);
+        console.error("Status code:", err.response.status);
+      }
+
       setMessages((prev) => [
         ...prev,
         {

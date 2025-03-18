@@ -1,5 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 
+// DEBUG - Stampa le variabili d'ambiente
+console.log('SUPABASE ENV VARS:', {
+  url: import.meta.env.VITE_SUPABASE_URL,
+  key: import.meta.env.VITE_SUPABASE_PUBLIC_KEY ? 'PRESENTE' : 'MANCANTE',
+});
+
 // Ottieni le variabili d'ambiente
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLIC_KEY;

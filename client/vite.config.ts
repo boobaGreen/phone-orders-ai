@@ -15,10 +15,19 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:3005", 
+        target: "http://localhost:3005",
         changeOrigin: true,
         secure: false,
       },
     },
+  },
+  define: {
+    // Assicurati che le variabili d'ambiente siano disponibili
+    "process.env.VITE_SUPABASE_URL": JSON.stringify(
+      process.env.VITE_SUPABASE_URL
+    ),
+    "process.env.VITE_SUPABASE_PUBLIC_KEY": JSON.stringify(
+      process.env.VITE_SUPABASE_PUBLIC_KEY
+    ),
   },
 });

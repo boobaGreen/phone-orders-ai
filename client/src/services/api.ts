@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 
-// Modifica questa configurazione
+// Usa sempre l'URL completo del backend
 const apiUrl =
   import.meta.env.VITE_API_URL ||
   "https://phone-orders-ai-production.up.railway.app/api";

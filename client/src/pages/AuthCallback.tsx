@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/auth-store";
 import { supabase, getSupabaseToken } from "../services/supabase";
 
+console.log("AuthCallback mounting, URL:", window.location.href);
+
 const AuthCallback = () => {
   const [error, setError] = useState<string | null>(null);
   const { login, register } = useAuthStore();

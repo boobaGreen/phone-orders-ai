@@ -200,7 +200,7 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
 
 - [ ] **Documentazione API**
 
-  - Generare documentazione API completa con Swagger/OpenAPI
+  - Generare documentazione API completa con Swagger/OpenAPI-
   - Aggiungere esempi di utilizzo per ogni endpoint
   - Creare guide di integrazione per sviluppatori di terze parti
 

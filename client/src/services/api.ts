@@ -1,28 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 
-// Per debug
-console.log("API URL:", import.meta.env.VITE_API_URL);
+// Modifica questa configurazione
+const apiUrl =
+  import.meta.env.VITE_API_URL ||
+  "https://phone-orders-ai-production.up.railway.app/api";
+console.log("API URL configuration:", apiUrl);
 
-// Configura axios per usare l'URL corretto
 const api = axios.create({
-  // Usa l'URL relativo se siamo in produzione
-  baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true,
+  baseURL: apiUrl,
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 // Interceptor per debugging
 api.interceptors.request.use(
   (config) => {
-    console.log(`API Request to: ${config.baseURL}${config.url}`);
+    console.log(
+      `Sending ${config.method?.toUpperCase()} to ${config.baseURL}${
+        config.url
+      }`
+    );
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Versione pulita dell'interceptor

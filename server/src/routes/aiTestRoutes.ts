@@ -1,13 +1,18 @@
 import express, { Request, Response } from "express";
-import * as aiTestController from "../controllers/aiTestController";
+import {
+  chat,
+  processAudio,
+  resetConversation,
+  getMenu,
+} from "../controllers/aiTestController";
 import transcriptionService from "../services/transcriptionService";
 
 const router = express.Router();
 
 // Route esistenti
-router.post("/chat", aiTestController.chat);
-router.post("/audio", aiTestController.processAudio);
-router.post("/reset", aiTestController.resetConversation);
+router.post("/chat", chat);
+router.post("/audio", processAudio);
+router.post("/reset", resetConversation);
 
 // Aggiungi questa nuova route per lo stato di Vosk
 router.get("/vosk-status", (req: Request, res: Response) => {
@@ -15,5 +20,8 @@ router.get("/vosk-status", (req: Request, res: Response) => {
   const status = transcriptionService.getStatus();
   res.json(status);
 });
+
+// Aggiungi questa nuova route per il menu
+router.get("/menu", getMenu);
 
 export default router;

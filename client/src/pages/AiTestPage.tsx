@@ -52,6 +52,12 @@ export default function AiTestPage() {
   const streamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<any>(null);
 
+  // Aggiungi un nuovo stato per il menu
+  const [showMenu, setShowMenu] = useState(false);
+  const [testMenu, setTestMenu] = useState<
+    { category: string; items: any[] }[]
+  >([]);
+
   // Scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -61,7 +67,6 @@ export default function AiTestPage() {
   useEffect(() => {
     return () => {
       if (streamRef.current) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
       if (recognitionRef.current) {
@@ -95,6 +100,39 @@ export default function AiTestPage() {
     checkVoskStatus();
     const interval = setInterval(checkVoskStatus, 3000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Carica il menu di test
+  useEffect(() => {
+    const fetchTestMenu = async () => {
+      try {
+        const response = await axios.get("/api/ai-test/menu");
+        if (response.data.menu) {
+          // Organizza il menu per categorie
+          const menuByCategory: Record<string, any[]> = {};
+          response.data.menu.forEach((item: any) => {
+            if (!menuByCategory[item.category]) {
+              menuByCategory[item.category] = [];
+            }
+            menuByCategory[item.category].push(item);
+          });
+
+          // Converti in array per il rendering
+          const formattedMenu = Object.entries(menuByCategory).map(
+            ([category, items]) => ({
+              category,
+              items,
+            })
+          );
+
+          setTestMenu(formattedMenu);
+        }
+      } catch (error) {
+        console.error("Errore nel caricamento del menu di test:", error);
+      }
+    };
+
+    fetchTestMenu();
   }, []);
 
   // Funzione per avviare/fermare la registrazione
@@ -351,10 +389,53 @@ export default function AiTestPage() {
     ]);
   };
 
+  // Aggiungi questo componente nella UI
+  const MenuDisplay = () => (
+    <Card className="mb-4">
+      <CardHeader>
+        <CardTitle className="flex justify-between items-center">
+          <span>Menu della Pizzeria Test</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowMenu(!showMenu)}
+          >
+            {showMenu ? "Nascondi Menu" : "Mostra Menu"}
+          </Button>
+        </CardTitle>
+      </CardHeader>
+      {showMenu && (
+        <CardContent>
+          <div className="space-y-4">
+            {testMenu.map((categoryGroup) => (
+              <div key={categoryGroup.category}>
+                <h3 className="font-medium text-lg mb-2">
+                  {categoryGroup.category}
+                </h3>
+                <div className="space-y-2 ml-2">
+                  {categoryGroup.items.map((item) => (
+                    <div key={item.name} className="border-b pb-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium">{item.name}</span>
+                        <span>€{item.price.toFixed(2)}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      )}
+    </Card>
+  );
+
   return (
     <div className="container py-8">
       <h1 className="text-3xl font-bold mb-6">Test Assistente AI</h1>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
           <Card className="h-[600px] flex flex-col">
@@ -467,6 +548,7 @@ export default function AiTestPage() {
         </div>
 
         <div>
+          <MenuDisplay />
           <Card>
             <CardHeader>
               <CardTitle>Dettagli Ordine</CardTitle>

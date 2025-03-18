@@ -11,16 +11,28 @@ import transcriptionService from "./services/transcriptionService";
 const app = express();
 
 // Middleware dell'ordine importante: cors deve venire PRIMA di helmet
-// Configurazione CORS più permissiva per lo sviluppo locale
+// Modifica la configurazione CORS per essere più permissiva
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://phone-orders-ai.vercel.app", // Assicurati che questo sia presente
+      "https://phone-orders-ai.vercel.app",
+      // Aggiungi anche versioni con www o sottodomini se necessario
+      "https://*.phone-orders-ai.vercel.app",
     ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   })
 );
+
+// Aggiungi questo per debug
+app.use((req, res, next) => {
+  console.log(`[CORS Debug] Request from origin: ${req.headers.origin}`);
+  next();
+});
 
 // Configura Helmet in modo meno restrittivo per lo sviluppo
 app.use(

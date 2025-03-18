@@ -10,7 +10,7 @@ import {
 import { Mic, MicOff, Send, RefreshCw } from "lucide-react";
 import { Textarea } from "../components/ui/textarea";
 import { ScrollArea } from "../components/ui/scroll-area";
-import axios from "axios";
+// Rimuovi l'import axios non necessario
 import api from "../services/api";
 
 interface Message {
@@ -80,9 +80,8 @@ export default function AiTestPage() {
   useEffect(() => {
     const checkVoskStatus = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/ai-test/vosk-status`
-        );
+        // Aggiornato da axios a api
+        const response = await api.get("/ai-test/vosk-status");
         const { ready, downloadProgress } = response.data;
 
         setIsVoskReady(ready);
@@ -109,9 +108,8 @@ export default function AiTestPage() {
   useEffect(() => {
     const fetchTestMenu = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/ai-test/menu`
-        );
+        // Aggiornato da axios a api
+        const response = await api.get("/ai-test/menu");
         if (response.data.menu) {
           // Organizza il menu per categorie
           const menuByCategory: Record<string, any[]> = {};
@@ -286,16 +284,12 @@ export default function AiTestPage() {
       formData.append("audio", audioBlob, "recording.wav");
       formData.append("conversationId", conversationId || "new");
 
-      // CORREZIONE: Usa l'istanza axios configurata o la variabile d'ambiente
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/ai-test/audio`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      // Usa l'instanza api invece di axios direttamente
+      const response = await api.post("/ai-test/audio", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       const {
         aiResponse,
@@ -378,11 +372,8 @@ export default function AiTestPage() {
   const resetConversation = async () => {
     if (conversationId) {
       try {
-        await axios.delete(
-          `${
-            import.meta.env.VITE_API_URL
-          }/ai-test/conversation/${conversationId}`
-        );
+        // Aggiornato da axios a api
+        await api.delete(`/ai-test/conversation/${conversationId}`);
       } catch (err) {
         console.error("Errore nel reset della conversazione:", err);
       }

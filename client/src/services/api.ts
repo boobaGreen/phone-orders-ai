@@ -13,14 +13,10 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Interceptor per debugging
+// Aggiungi un interceptor per debugging
 api.interceptors.request.use(
   (config) => {
-    console.log(
-      `Sending ${config.method?.toUpperCase()} to ${config.baseURL}${
-        config.url
-      }`
-    );
+    console.log(`API Request to: ${config.baseURL}${config.url}`);
     return config;
   },
   (error) => Promise.reject(error)
@@ -46,6 +42,15 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+// Estendi l'istanza di axios per supportare multipart/form-data
+export const uploadFile = async (url: string, formData: any) => {
+  return api.post(url, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
 
 // API endpoints - Auth
 export const authAPI = {

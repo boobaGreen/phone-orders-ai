@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 
-// Usa sempre l'URL completo del backend
-const apiUrl =
-  import.meta.env.VITE_API_URL ||
-  "https://phone-orders-ai-production.up.railway.app/api";
+// Usa l'URL esatto dalla variabile d'ambiente, come in locale
+const apiUrl = import.meta.env.VITE_API_URL;
 console.log("API URL configuration:", apiUrl);
 
 const api = axios.create({

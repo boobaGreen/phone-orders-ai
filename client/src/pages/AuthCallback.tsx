@@ -46,7 +46,15 @@ const AuthCallback = () => {
           await register(user.email || "", name, user.id);
         } else {
           // Per un utente esistente, esegui il login
-          await login(token);
+          try {
+            // Chiama il servizio di login del backend con il token
+            await login(token);
+            console.log("Login successful, redirecting to dashboard");
+            navigate("/dashboard");
+          } catch (err) {
+            console.error("Error during backend login:", err);
+            setError("Errore durante il login. Riprova più tardi.");
+          }
         }
 
         // Reindirizza alla dashboard

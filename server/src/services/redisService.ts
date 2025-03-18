@@ -2,7 +2,7 @@ import Redis from "ioredis";
 import { config } from "../config";
 
 class RedisService {
-  private client: Redis;
+  private client!: Redis; // Aggiungi ! per dire a TypeScript che questa proprietà sarà sicuramente inizializzata
   isConnected: boolean = false;
 
   constructor() {
@@ -37,6 +37,8 @@ class RedisService {
     } catch (error) {
       console.error("Error initializing Redis client:", error);
       this.isConnected = false;
+      // Inizializza client a un valore di fallback per evitare errori nulli
+      this.client = new Redis({ lazyConnect: true }); // Non si connetterà effettivamente
     }
   }
 

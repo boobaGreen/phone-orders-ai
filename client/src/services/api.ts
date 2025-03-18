@@ -7,7 +7,7 @@ console.log("API URL:", import.meta.env.VITE_API_URL);
 // Configura axios per usare l'URL corretto
 const api = axios.create({
   // Usa l'URL relativo se siamo in produzione
-  baseURL: import.meta.env.PROD ? "/api" : import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

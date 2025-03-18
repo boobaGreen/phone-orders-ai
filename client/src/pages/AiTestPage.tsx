@@ -11,6 +11,7 @@ import { Mic, MicOff, Send, RefreshCw } from "lucide-react";
 import { Textarea } from "../components/ui/textarea";
 import { ScrollArea } from "../components/ui/scroll-area";
 import axios from "axios";
+import api from "../services/api";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -108,7 +109,9 @@ export default function AiTestPage() {
   useEffect(() => {
     const fetchTestMenu = async () => {
       try {
-        const response = await axios.get("/api/ai-test/menu");
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/ai-test/menu`
+        );
         if (response.data.menu) {
           // Organizza il menu per categorie
           const menuByCategory: Record<string, any[]> = {};
@@ -241,7 +244,7 @@ export default function AiTestPage() {
     setMessages((prev) => [...prev, { role: "user", content: transcript }]);
 
     try {
-      const response = await axios.post("/api/ai-test/process-text", {
+      const response = await api.post("/ai-test/process-text", {
         text: transcript,
         conversationId,
       });
@@ -337,7 +340,7 @@ export default function AiTestPage() {
     setInputText("");
 
     try {
-      const response = await axios.post("/api/ai-test/process-text", {
+      const response = await api.post("/ai-test/process-text", {
         text: userMessage,
         conversationId,
       });
@@ -375,7 +378,11 @@ export default function AiTestPage() {
   const resetConversation = async () => {
     if (conversationId) {
       try {
-        await axios.delete(`/api/ai-test/conversation/${conversationId}`);
+        await axios.delete(
+          `${
+            import.meta.env.VITE_API_URL
+          }/ai-test/conversation/${conversationId}`
+        );
       } catch (err) {
         console.error("Errore nel reset della conversazione:", err);
       }

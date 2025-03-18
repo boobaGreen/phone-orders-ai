@@ -1,17 +1,23 @@
 import { createClient } from "@supabase/supabase-js";
 
-// DEBUG - Stampa le variabili d'ambiente
-console.log('SUPABASE ENV VARS:', {
-  url: import.meta.env.VITE_SUPABASE_URL,
-  key: import.meta.env.VITE_SUPABASE_PUBLIC_KEY ? 'PRESENTE' : 'MANCANTE',
+// Debug - Stampa le variabili d'ambiente
+console.log("SUPABASE ENV VARS:", {
+  url: import.meta.env.VITE_SUPABASE_URL || "MANCANTE",
+  key: import.meta.env.VITE_SUPABASE_PUBLIC_KEY ? "PRESENTE" : "MANCANTE",
 });
 
 // Ottieni le variabili d'ambiente
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLIC_KEY;
 
-// Configurazione URL di callback
-// const AUTH_CALLBACK_URL = `${window.location.origin}/auth/callback`;
+if (!supabaseUrl || !supabaseKey) {
+  console.error(
+    "Errore critico: Supabase URL o key mancanti nelle variabili d'ambiente!"
+  );
+  throw new Error(
+    "Configurazione Supabase incompleta. Controlla le variabili d'ambiente."
+  );
+}
 
 // Crea il client Supabase
 export const supabase = createClient(supabaseUrl, supabaseKey);

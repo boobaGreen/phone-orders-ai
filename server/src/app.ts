@@ -16,7 +16,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://phone-orders-6u0jke5af-boobagreens-projects.vercel.app",
+      "https://phone-orders-ai.vercel.app", // Aggiungi il nuovo URL
     ],
     credentials: true,
   })

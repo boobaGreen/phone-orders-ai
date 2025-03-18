@@ -78,31 +78,51 @@ export default function AiTestPage() {
 
   // Check Vosk status
   useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
     const checkVoskStatus = async () => {
       try {
-        // Aggiornato da axios a api
         const response = await api.get("/ai-test/vosk-status");
         const { ready, downloadProgress } = response.data;
 
-        setIsVoskReady(ready);
-        if (!ready && downloadProgress < 100) {
+        // Se il modello è pronto, aggiorna lo stato e interrompi il polling
+        if (ready) {
+          setIsVoskReady(true);
+          setLoadingMessage("");
+          // Importante: ferma il polling quando il modello è pronto
+          if (interval) {
+            console.log("Vosk model ready, stopping polling");
+            clearInterval(interval);
+          }
+        } else if (downloadProgress < 100) {
           setLoadingMessage(
             `Preparazione modello vocale: ${downloadProgress}%`
           );
-        } else if (!ready) {
-          setLoadingMessage("Inizializzazione modello vocale...");
         } else {
-          setLoadingMessage("");
+          setLoadingMessage("Inizializzazione modello vocale...");
         }
       } catch (error) {
         console.error("Errore nel controllo dello stato di Vosk:", error);
       }
     };
 
+    // Controlla una volta all'inizio
     checkVoskStatus();
-    const interval = setInterval(checkVoskStatus, 3000);
-    return () => clearInterval(interval);
-  }, []);
+
+    // Inizia il polling solo se Vosk non è ancora pronto
+    if (!isVoskReady) {
+      console.log("Starting Vosk polling");
+      interval = setInterval(checkVoskStatus, 5000); // Aumenta l'intervallo a 5 secondi
+    }
+
+    // Cleanup: ferma il polling quando il componente viene smontato
+    return () => {
+      if (interval) {
+        console.log("Cleaning up Vosk polling");
+        clearInterval(interval);
+      }
+    };
+  }, [isVoskReady]); // Importante: aggiungi isVoskReady come dipendenza
 
   // Carica il menu di test
   useEffect(() => {
@@ -242,24 +262,40 @@ export default function AiTestPage() {
     setMessages((prev) => [...prev, { role: "user", content: transcript }]);
 
     try {
-      const response = await api.post("/ai-test/process-text", {
+      const response: {
+        data: {
+          aiResponse: string;
+          transcript: string;
+          conversationId: string;
+          currentOrder?: OrderItem[];
+        };
+      } = await api.post("/ai-test/process-text", {
         text: transcript,
         conversationId,
       });
 
       const {
         aiResponse,
+        transcript: receivedTranscript,
         conversationId: newConversationId,
         currentOrder: newOrder,
       } = response.data;
 
-      if (!conversationId) {
+      // Importante: aggiorna l'ID conversazione se è nuovo
+      if (newConversationId && !conversationId) {
         setConversationId(newConversationId);
       }
 
-      setCurrentOrder(newOrder || []);
+      // Aggiorna l'ordine corrente con i nuovi elementi
+      if (newOrder) {
+        console.log("Aggiornamento ordine:", newOrder);
+        setCurrentOrder(newOrder);
+      }
+
+      // Aggiorna i messaggi con la trascrizione e la risposta AI
       setMessages((prev) => [
         ...prev,
+        { role: "user", content: receivedTranscript },
         { role: "assistant", content: aiResponse },
       ]);
     } catch (err) {
@@ -298,14 +334,20 @@ export default function AiTestPage() {
         currentOrder: newOrder,
       } = response.data;
 
-      if (!conversationId) {
+      // Importante: aggiorna l'ID conversazione se è nuovo
+      if (newConversationId && !conversationId) {
         setConversationId(newConversationId);
       }
 
-      setCurrentOrder(newOrder || []);
+      // Aggiorna l'ordine corrente con i nuovi elementi
+      if (newOrder) {
+        console.log("Aggiornamento ordine:", newOrder);
+        setCurrentOrder(newOrder);
+      }
+
+      // Aggiorna i messaggi con la trascrizione e la risposta AI
       setMessages((prev) => [
         ...prev,
-        // Mostra ciò che è stato trascritto
         { role: "user", content: transcript },
         { role: "assistant", content: aiResponse },
       ]);

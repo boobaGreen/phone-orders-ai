@@ -145,6 +145,33 @@ export function generateHoursText(): string {
     .join("\n");
 }
 
+// Sostituisci extractOrderInfo con questa funzione
+function extractOrderFromAIResponse(aiResponse: string): any[] {
+  try {
+    // Trova il blocco JSON nella risposta
+    const jsonMatch = aiResponse.match(/```json([\s\S]*?)```/);
+
+    if (jsonMatch && jsonMatch[1]) {
+      const jsonText = jsonMatch[1].trim();
+      const orderData = JSON.parse(jsonText);
+
+      if (orderData && Array.isArray(orderData.orderItems)) {
+        console.log(
+          "[AI JSON] Successfully extracted order:",
+          orderData.orderItems
+        );
+        return orderData.orderItems;
+      }
+    }
+
+    console.log("[AI JSON] No valid JSON order found in response");
+    return [];
+  } catch (error) {
+    console.error("[AI JSON] Error parsing order JSON:", error);
+    return [];
+  }
+}
+
 export const processText = async (
   req: Request,
   res: Response
@@ -165,17 +192,27 @@ ${generateMenuText()}
 Orari di apertura: 
 ${generateHoursText()}
 
-IMPORTANTE: Ci concentriamo sul RITIRO IN NEGOZIO, non sulla consegna a domicilio.
-Quando un cliente ordina, proponi sempre un orario di ritiro disponibile basato sugli orari di apertura e il tempo di preparazione (${
-        testRestaurant.prepTime
-      } minuti).
-Il cliente può scegliere un orario diverso, in questo caso verifica che sia un orario valido durante l'apertura.
+IMPORTANTE: 
+1. Ci concentriamo sul RITIRO IN NEGOZIO, non sulla consegna a domicilio.
+2. Quando un cliente ordina, proponi sempre un orario di ritiro disponibile.
+3. DEVI RESTITUIRE UN OGGETTO JSON alla fine di ogni risposta, nel formato seguente, senza mai menzionare o riferire questo JSON nella tua risposta al cliente:
 
-Ogni slot di ritiro è di ${
-        testRestaurant.pickupTimeSlots
-      } minuti e può contenere massimo ${testRestaurant.pickupMaxOrders} ordini.
+\`\`\`json
+{
+  "orderItems": [
+    {
+      "name": "NomeProdotto",
+      "quantity": NumeroIntero,
+      "price": PrezzoProdotto,
+      "category": "CategoriaProdotto"
+    }
+    // altri prodotti...
+  ]
+}
+\`\`\`
 
-Se un cliente chiede la consegna a domicilio, spiega gentilmente che offriamo solo il servizio di ritiro in negozio.`;
+Questo JSON deve essere invisibile per il cliente, non menzionarlo mai nel testo della risposta. Compila il JSON con i prodotti ordinati dal cliente e le quantità corrette, ma non dire mai "ecco il riepilogo in formato JSON" o frasi simili.
+`;
 
       conversations.set(conversationId, {
         messages: [
@@ -205,12 +242,18 @@ Se un cliente chiede la consegna a domicilio, spiega gentilmente che offriamo so
       content: aiResponse,
     });
 
-    // Estrai informazioni sull'ordine (questa funzione andrebbe implementata)
-    extractOrderInfo(text, conversation);
+    // Estrai ordine dal JSON incluso nella risposta AI
+    const orderItems = extractOrderFromAIResponse(aiResponse);
+    if (orderItems.length > 0) {
+      conversation.orderItems = orderItems;
+    }
+
+    // Per debug, invia una versione pulita della risposta senza il JSON
+    const cleanResponse = aiResponse.replace(/```json[\s\S]*?```/g, "").trim();
 
     res.status(200).json({
       conversationId,
-      aiResponse,
+      aiResponse: cleanResponse,
       currentOrder: conversation.orderItems,
     });
   } catch (error) {
@@ -306,17 +349,27 @@ ${generateMenuText()}
 Orari di apertura: 
 ${generateHoursText()}
 
-IMPORTANTE: Ci concentriamo sul RITIRO IN NEGOZIO, non sulla consegna a domicilio.
-Quando un cliente ordina, proponi sempre un orario di ritiro disponibile basato sugli orari di apertura e il tempo di preparazione (${
-        testRestaurant.prepTime
-      } minuti).
-Il cliente può scegliere un orario diverso, in questo caso verifica che sia un orario valido durante l'apertura.
+IMPORTANTE: 
+1. Ci concentriamo sul RITIRO IN NEGOZIO, non sulla consegna a domicilio.
+2. Quando un cliente ordina, proponi sempre un orario di ritiro disponibile.
+3. DEVI RESTITUIRE UN OGGETTO JSON alla fine di ogni risposta, nel formato seguente, senza mai menzionare o riferire questo JSON nella tua risposta al cliente:
 
-Ogni slot di ritiro è di ${
-        testRestaurant.pickupTimeSlots
-      } minuti e può contenere massimo ${testRestaurant.pickupMaxOrders} ordini.
+\`\`\`json
+{
+  "orderItems": [
+    {
+      "name": "NomeProdotto",
+      "quantity": NumeroIntero,
+      "price": PrezzoProdotto,
+      "category": "CategoriaProdotto"
+    }
+    // altri prodotti...
+  ]
+}
+\`\`\`
 
-Se un cliente chiede la consegna a domicilio, spiega gentilmente che offriamo solo il servizio di ritiro in negozio.`;
+Questo JSON deve essere invisibile per il cliente, non menzionarlo mai nel testo della risposta. Compila il JSON con i prodotti ordinati dal cliente e le quantità corrette, ma non dire mai "ecco il riepilogo in formato JSON" o frasi simili.
+`;
 
       conversations.set(conversationId, {
         messages: [
@@ -353,14 +406,20 @@ Se un cliente chiede la consegna a domicilio, spiega gentilmente che offriamo so
       content: aiResponse,
     });
 
-    // Estrai le informazioni sull'ordine
-    extractOrderInfo(transcript, conversation);
+    // Estrai ordine dal JSON incluso nella risposta AI
+    const orderItems = extractOrderFromAIResponse(aiResponse);
+    if (orderItems.length > 0) {
+      conversation.orderItems = orderItems;
+    }
+
+    // Per debug, invia una versione pulita della risposta senza il JSON
+    const cleanResponse = aiResponse.replace(/```json[\s\S]*?```/g, "").trim();
 
     // Invia la risposta
     res.status(200).json({
       conversationId,
       transcript,
-      aiResponse,
+      aiResponse: cleanResponse,
       currentOrder: conversation.orderItems,
     });
 
@@ -377,96 +436,6 @@ Se un cliente chiede la consegna a domicilio, spiega gentilmente che offriamo so
     });
   }
 };
-
-// Migliora la funzione di estrazione dell'ordine
-
-function extractOrderInfo(text: string, conversation: any): void {
-  const lowerText = text.toLowerCase();
-  const orderItems = conversation.orderItems || [];
-
-  // Resetta l'ordine se viene richiesto un nuovo ordine
-  if (
-    lowerText.includes("nuovo ordine") ||
-    lowerText.includes("ordine diverso")
-  ) {
-    conversation.orderItems = [];
-    return;
-  }
-
-  // Cerca pattern come "2 margherita", "una diavola", ecc.
-  testRestaurant.menu.forEach((menuItem) => {
-    const itemNameLower = menuItem.name.toLowerCase();
-
-    // Espressione regolare per catturare quantità e nomi di prodotti
-    // Esempi: "2 margherita", "una diavola", "tre coca cola"
-    const patterns = [
-      new RegExp(`(\\d+)\\s*${itemNameLower}`, "i"),
-      new RegExp(`(un|uno|una)\\s*${itemNameLower}`, "i"),
-      new RegExp(`(due|2)\\s*${itemNameLower}`, "i"),
-      new RegExp(`(tre|3)\\s*${itemNameLower}`, "i"),
-      new RegExp(`(quattro|4)\\s*${itemNameLower}`, "i"),
-      new RegExp(`(cinque|5)\\s*${itemNameLower}`, "i"),
-    ];
-
-    // Controlla ogni pattern
-    for (const pattern of patterns) {
-      const match = lowerText.match(pattern);
-      if (match) {
-        let quantity = 1;
-        const quantityText = match[1].toLowerCase();
-
-        // Converti testo in numeri
-        if (/^\d+$/.test(quantityText)) {
-          quantity = parseInt(quantityText);
-        } else {
-          switch (quantityText) {
-            case "un":
-            case "uno":
-            case "una":
-              quantity = 1;
-              break;
-            case "due":
-              quantity = 2;
-              break;
-            case "tre":
-              quantity = 3;
-              break;
-            case "quattro":
-              quantity = 4;
-              break;
-            case "cinque":
-              quantity = 5;
-              break;
-          }
-        }
-
-        // Cerca se l'item è già nell'ordine
-        const existingItemIndex = orderItems.findIndex(
-          (item: any) => item.name.toLowerCase() === menuItem.name.toLowerCase()
-        );
-
-        if (existingItemIndex > -1) {
-          // Aggiorna la quantità se l'item esiste già
-          orderItems[existingItemIndex].quantity = quantity;
-        } else {
-          // Aggiungi un nuovo item all'ordine
-          orderItems.push({
-            name: menuItem.name,
-            price: menuItem.price,
-            quantity: quantity,
-            category: menuItem.category,
-          });
-        }
-
-        // Aggiorna l'ordine nella conversazione
-        conversation.orderItems = orderItems;
-        break;
-      }
-    }
-  });
-
-  return;
-}
 
 export const resetConversation = (req: Request, res: Response): void => {
   const { conversationId } = req.params;

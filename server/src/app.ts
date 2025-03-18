@@ -7,6 +7,7 @@ import { config } from "./config";
 import routes from "./routes";
 import redisService from "./services/redisService";
 import transcriptionService from "./services/transcriptionService";
+import aiTestRoutes from "./routes/aiTestRoutes";
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api", routes);
+app.use("/api/ai-test", aiTestRoutes);
 
 // Health check route più completo
 app.get("/health", (req, res) => {
@@ -58,6 +60,38 @@ app.get("/health", (req, res) => {
       vosk: transcriptionService.getStatus().ready ? "ready" : "not ready",
     },
     uptime: process.uptime() + "s",
+  });
+});
+
+// Aggiungi questo codice per debug
+app.get("/api/routes-check", (req, res) => {
+  // Crea un elenco di tutte le route registrate
+  const routes: { path: any; method: string; }[] = [];
+
+  app._router.stack.forEach((middleware: { route: { path: any; methods: {}; }; name: string; handle: { stack: any[]; }; regexp: any; }) => {
+    if (middleware.route) {
+      // Route registrata direttamente
+      routes.push({
+        path: middleware.route.path,
+        method: Object.keys(middleware.route.methods)[0].toUpperCase(),
+      });
+    } else if (middleware.name === "router") {
+      // Router o stack di middleware
+      middleware.handle.stack.forEach((handler) => {
+        if (handler.route) {
+          const path = middleware.regexp
+            ? `${middleware.regexp}`
+            : "" + handler.route.path;
+          const method = Object.keys(handler.route.methods)[0].toUpperCase();
+          routes.push({ path, method });
+        }
+      });
+    }
+  });
+
+  res.json({
+    routes,
+    message: "Questa è una lista di tutte le rotte API registrate",
   });
 });
 

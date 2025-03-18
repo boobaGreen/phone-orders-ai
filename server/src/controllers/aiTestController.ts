@@ -466,9 +466,7 @@ export const handleAudioBase64 = async (
     fs.writeFileSync(tempFilePath, audioBuffer);
 
     // Trascrivi l'audio usando il servizio
-    const transcript = await transcriptionService.transcribeAudio(
-      tempFilePath
-    );
+    const transcript = await transcriptionService.transcribeAudio(tempFilePath);
 
     // Elimina il file temporaneo
     fs.unlinkSync(tempFilePath);
@@ -508,13 +506,22 @@ export const getMenu = (req: Request, res: Response): void => {
   });
 };
 
+// Correzione per chat
+export const chat = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // Usa la stessa logica di processText temporaneamente
+    await processText(req, res);
+  } catch (error) {
+    console.error("Errore nella chat:", error);
+    res.status(500).json({ error: "Si è verificato un errore nella chat" });
+  }
+};
+
 export default {
   processText,
   handleAudioUpload,
   resetConversation,
   getMenu,
   handleAudioBase64,
+  chat,
 };
-export function chat(arg0: string, chat: any) {
-  throw new Error("Function not implemented.");
-}

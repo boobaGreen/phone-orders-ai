@@ -1,15 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 
-// Usa un URL relativo quando utilizzi il proxy di Vite
-const API_URL = "/api"; // oppure "http://localhost:3005/api"
+// Debug: stampa l'URL dell'API in console
+console.log("API URL:", import.meta.env.VITE_API_URL || "NON DEFINITO");
 
 // Crea un'istanza di axios con la configurazione di base
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
+});
+
+// Aggiungi un interceptor per diagnosticare i problemi
+api.interceptors.request.use((config) => {
+  console.log(`Request to: ${config.baseURL}${config.url}`);
+  return config;
 });
 
 // Versione pulita dell'interceptor

@@ -14,10 +14,7 @@ const app = express();
 // Configurazione CORS più permissiva per lo sviluppo locale
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://phone-orders-ai.vercel.app", // Aggiungi il nuovo URL
-    ],
+    origin: ["http://localhost:5173", "https://phone-orders-ai.vercel.app"],
     credentials: true,
   })
 );

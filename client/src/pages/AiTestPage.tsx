@@ -281,9 +281,9 @@ export default function AiTestPage() {
       formData.append("audio", audioBlob, "recording.wav");
       formData.append("conversationId", conversationId || "new");
 
-      // MODIFICA QUI: Usa l'URL completo del backend
+      // CORREZIONE: Usa l'istanza axios configurata o la variabile d'ambiente
       const response = await axios.post(
-        "http://localhost:3005/api/ai-test/audio",
+        `${import.meta.env.VITE_API_URL}/ai-test/audio`,
         formData,
         {
           headers: {

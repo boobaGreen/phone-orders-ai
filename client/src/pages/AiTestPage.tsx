@@ -79,7 +79,9 @@ export default function AiTestPage() {
   useEffect(() => {
     const checkVoskStatus = async () => {
       try {
-        const response = await axios.get("/api/ai-test/vosk-status");
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/ai-test/vosk-status`
+        );
         const { ready, downloadProgress } = response.data;
 
         setIsVoskReady(ready);

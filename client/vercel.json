@@ -5,6 +5,11 @@
       "destination": "https://phone-orders-ai-production.up.railway.app/api/:path*"
     }
   ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/auth/callback.*", "dest": "/auth/callback" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",

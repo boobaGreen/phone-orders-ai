@@ -24,7 +24,8 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Login con Google
 export const signInWithGoogle = async () => {
-  const redirectUrl = `${window.location.origin}/auth/callback`; // Deve corrispondere alla route nel router
+  // Usa il percorso esatto definito nel router
+  const redirectUrl = `${window.location.origin}/auth/callback`;
   console.log("OAuth flow starting. App callback will be:", redirectUrl);
 
   try {
@@ -32,6 +33,8 @@ export const signInWithGoogle = async () => {
       provider: "google",
       options: {
         redirectTo: redirectUrl,
+        // Aggiungi scopes se necessario
+        scopes: "email profile",
       },
     });
 

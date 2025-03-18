@@ -14,9 +14,11 @@ const app = express();
 // Configurazione CORS più permissiva per lo sviluppo locale
 app.use(
   cors({
-    origin: "*", // In ambiente di sviluppo, permetti qualsiasi origine
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: [
+      "http://localhost:5173",
+      "https://phone-orders-6u0jke5af-boobagreens-projects.vercel.app",
+    ],
+    credentials: true,
   })
 );
 

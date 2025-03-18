@@ -223,7 +223,7 @@ Questo documento elenca le funzionalità da implementare e i bug da risolvere ne
 
 ## UI/UX Generale
 
-### Tema Scuro
+### Tema Scuro -
 
 - [x] **Implementare Modalità Dark**
   - ✅ Aggiungere variabili CSS per tema scuro in `index.css`

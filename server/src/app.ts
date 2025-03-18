@@ -5,6 +5,8 @@ import cors from "cors";
 import helmet from "helmet";
 import { config } from "./config";
 import routes from "./routes";
+import redisService from "./services/redisService";
+import transcriptionService from "./services/transcriptionService";
 
 const app = express();
 
@@ -33,9 +35,21 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routes
 app.use("/api", routes);
 
-// Health check route
+// Health check route più completo
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "OK", environment: process.env.NODE_ENV });
+  const mongoStatus =
+    mongoose.connection.readyState === 1 ? "connected" : "disconnected";
+
+  res.status(200).json({
+    status: "OK",
+    environment: process.env.NODE_ENV,
+    services: {
+      database: mongoStatus,
+      redis: redisService.isConnected ? "connected" : "disconnected",
+      vosk: transcriptionService.getStatus().ready ? "ready" : "not ready",
+    },
+    uptime: process.uptime() + "s",
+  });
 });
 
 // Database connection

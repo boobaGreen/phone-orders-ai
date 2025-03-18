@@ -48,37 +48,56 @@ class TranscriptionService {
   }
 
   private async initializeModel(): Promise<void> {
-    if (!vosk) {
-      console.warn(
-        "⚠️ Vosk non disponibile. Verrà utilizzata la trascrizione simulata."
-      );
-      return;
-    }
-
     try {
-      voskStatus.emit("status", { status: "checking" });
-
-      // Verifica se il modello esiste già
-      if (!fs.existsSync(this.modelPath)) {
-        console.log("🔄 Downloading Vosk Italian model (first use only)...");
-        voskStatus.emit("status", { status: "downloading", progress: 0 });
-        await this.downloadModel();
-      }
-
-      voskStatus.emit("status", { status: "initializing" });
       console.log("🔄 Inizializzazione del modello Vosk in corso...");
 
-      // Test di caricamento del modello
-      const model = new vosk.Model(this.modelPath);
-      model.free(); // Libera la memoria dopo il test
+      // 👇 AGGIUNGI QUESTO BLOCCO QUI
+      // Verifica se il modello esiste
+      if (!fs.existsSync(this.modelPath)) {
+        console.log("Modello Vosk non trovato, download in corso...");
+        await this.downloadModel();
+      }
+      // 👆 FINE DEL NUOVO CODICE
 
-      this.isModelReady = true;
-      console.log("✅ Vosk model initialized successfully and ready for use!");
-      voskStatus.emit("status", { status: "ready" });
+      if (vosk && fs.existsSync(this.modelPath)) {
+        try {
+          // Tentativo di caricare il modello Vosk
+          new vosk.Model(this.modelPath);
+          this.isModelReady = true;
+          console.log(
+            "✅ Vosk model initialized successfully and ready for use!"
+          );
+
+          voskStatus.emit("status", {
+            status: "ready",
+            path: this.modelPath,
+          });
+        } catch (error) {
+          console.error("❌ Error initializing Vosk model:", error);
+          this.isModelReady = false;
+
+          voskStatus.emit("status", {
+            status: "error",
+            error: "Errore nell'inizializzazione del modello Vosk",
+          });
+        }
+      } else {
+        console.error("❌ Vosk not available or model path doesn't exist");
+        this.isModelReady = false;
+
+        voskStatus.emit("status", {
+          status: "error",
+          error: "Vosk non disponibile o il percorso del modello non esiste",
+        });
+      }
     } catch (error) {
-      console.error("❌ Failed to initialize Vosk model:", error);
-      voskStatus.emit("status", { status: "error", error });
+      console.error("❌ Error in Vosk initialization:", error);
       this.isModelReady = false;
+
+      voskStatus.emit("status", {
+        status: "error",
+        error: "Errore nell'inizializzazione di Vosk",
+      });
     }
   }
 

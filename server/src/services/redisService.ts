@@ -3,20 +3,41 @@ import { config } from "../config";
 
 class RedisService {
   private client: Redis;
+  isConnected: boolean = false;
 
   constructor() {
-    this.client = new Redis({
-      host: config.redis.host,
-      port: config.redis.port,
-    });
+    try {
+      // Se REDIS_URL è fornito (come su Railway), usa quello
+      if (process.env.REDIS_URL) {
+        console.log("Connecting to Redis using URL configuration");
+        this.client = new Redis(process.env.REDIS_URL);
+      } else {
+        // Altrimenti usa host e porta separati (configurazione locale)
+        console.log("Connecting to Redis using host/port configuration");
+        this.client = new Redis({
+          host: config.redis.host,
+          port: config.redis.port,
+        });
+      }
 
-    this.client.on("error", (err) => {
-      console.error("Redis Client Error", err);
-    });
+      // Gestione eventi
+      this.client.on("error", (err) => {
+        console.error("Redis Client Error", err);
+        this.isConnected = false;
+      });
 
-    this.client.on("connect", () => {
-      console.log("Redis Client Connected");
-    });
+      this.client.on("connect", () => {
+        console.log("Redis Client Connected");
+        this.isConnected = true;
+      });
+
+      this.client.on("reconnecting", () => {
+        console.log("Redis Client Reconnecting");
+      });
+    } catch (error) {
+      console.error("Error initializing Redis client:", error);
+      this.isConnected = false;
+    }
   }
 
   async set(key: string, value: string, expireTime?: number): Promise<void> {

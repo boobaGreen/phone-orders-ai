@@ -1,23 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 
-// Debug: stampa l'URL dell'API in console
-console.log("API URL:", import.meta.env.VITE_API_URL || "NON DEFINITO");
+// Per debug
+console.log("API URL:", import.meta.env.VITE_API_URL);
 
-// Crea un'istanza di axios con la configurazione di base
+// Configura axios per usare l'URL corretto
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  // Usa l'URL relativo se siamo in produzione
+  baseURL: import.meta.env.PROD ? "/api" : import.meta.env.VITE_API_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Aggiungi un interceptor per diagnosticare i problemi
-api.interceptors.request.use((config) => {
-  console.log(`Request to: ${config.baseURL}${config.url}`);
-  return config;
-});
+// Interceptor per debugging
+api.interceptors.request.use(
+  (config) => {
+    console.log(`API Request to: ${config.baseURL}${config.url}`);
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Versione pulita dell'interceptor
 api.interceptors.request.use((config) => {

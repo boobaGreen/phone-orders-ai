@@ -11,34 +11,11 @@ import aiTestRoutes from "./routes/aiTestRoutes";
 
 const app = express();
 
-// Aggiungi questa lista di domini consentiti
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://phone-orders-ai.vercel.app",
-  "https://phone-orders-ai-git-main-your-username.vercel.app",
-  "https://29c8-5-90-137-165.ngrok-free.app",
-];
-
-// Configura CORS con una funzione per l'origine
+// Middleware dell'ordine importante: cors deve venire PRIMA di helmet
+// Modifica la configurazione CORS per essere più permissiva
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Consenti richieste senza origin (come app mobili o richieste Postman)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, origin);
-      } else {
-        // Per sviluppo, puoi anche consentire tutte le origini quando NODE_ENV=development
-        if (process.env.NODE_ENV === "development") {
-          callback(null, origin);
-        } else {
-          console.log("CORS blocked request from:", origin);
-          callback(new Error("Not allowed by CORS"));
-        }
-      }
-    },
+    origin: ["http://localhost:5173", "https://phone-orders-ai.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     credentials: true,
@@ -89,35 +66,28 @@ app.get("/health", (req, res) => {
 // Aggiungi questo codice per debug
 app.get("/api/routes-check", (req, res) => {
   // Crea un elenco di tutte le route registrate
-  const routes: { path: any; method: string }[] = [];
+  const routes: { path: any; method: string; }[] = [];
 
-  app._router.stack.forEach(
-    (middleware: {
-      route: { path: any; methods: {} };
-      name: string;
-      handle: { stack: any[] };
-      regexp: any;
-    }) => {
-      if (middleware.route) {
-        // Route registrata direttamente
-        routes.push({
-          path: middleware.route.path,
-          method: Object.keys(middleware.route.methods)[0].toUpperCase(),
-        });
-      } else if (middleware.name === "router") {
-        // Router o stack di middleware
-        middleware.handle.stack.forEach((handler) => {
-          if (handler.route) {
-            const path = middleware.regexp
-              ? `${middleware.regexp}`
-              : "" + handler.route.path;
-            const method = Object.keys(handler.route.methods)[0].toUpperCase();
-            routes.push({ path, method });
-          }
-        });
-      }
+  app._router.stack.forEach((middleware: { route: { path: any; methods: {}; }; name: string; handle: { stack: any[]; }; regexp: any; }) => {
+    if (middleware.route) {
+      // Route registrata direttamente
+      routes.push({
+        path: middleware.route.path,
+        method: Object.keys(middleware.route.methods)[0].toUpperCase(),
+      });
+    } else if (middleware.name === "router") {
+      // Router o stack di middleware
+      middleware.handle.stack.forEach((handler) => {
+        if (handler.route) {
+          const path = middleware.regexp
+            ? `${middleware.regexp}`
+            : "" + handler.route.path;
+          const method = Object.keys(handler.route.methods)[0].toUpperCase();
+          routes.push({ path, method });
+        }
+      });
     }
-  );
+  });
 
   res.json({
     routes,

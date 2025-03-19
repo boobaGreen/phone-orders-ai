@@ -10,7 +10,6 @@ import {
 import { Mic, MicOff, Send, RefreshCw } from "lucide-react";
 import { Textarea } from "../components/ui/textarea";
 import { ScrollArea } from "../components/ui/scroll-area";
-// Rimuovi l'import axios non necessario
 import api from "../services/api";
 
 interface Message {
@@ -38,7 +37,7 @@ export default function AiTestPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "system",
-      content: "Benvenuto alla Pizzeria Test. Come posso aiutarti?",
+      content: "Benvenuto alla Pizzeria Demo. Come posso aiutarti?",
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,6 +45,7 @@ export default function AiTestPage() {
   const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
   const [isVoskReady, setIsVoskReady] = useState(false);
   const [, setLoadingMessage] = useState("");
+  const [browserSupportsSTT, setBrowserSupportsSTT] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -156,6 +156,21 @@ export default function AiTestPage() {
     };
 
     fetchTestMenu();
+  }, []);
+
+  // Controlla il supporto del browser per Web Speech API
+  useEffect(() => {
+    // Verifica se il browser supporta Web Speech API
+    const isWebSpeechSupported =
+      "webkitSpeechRecognition" in window || "SpeechRecognition" in window;
+
+    setBrowserSupportsSTT(isWebSpeechSupported);
+
+    // Se il browser non supporta Web Speech API, imposta anche isVoskReady a true
+    // per permettere altre funzionalità dell'applicazione
+    if (!isWebSpeechSupported) {
+      setIsVoskReady(true);
+    }
   }, []);
 
   // Funzione per avviare/fermare la registrazione
@@ -443,7 +458,7 @@ export default function AiTestPage() {
     setMessages([
       {
         role: "system",
-        content: "Benvenuto alla Pizzeria Test. Come posso aiutarti?",
+        content: "Benvenuto alla Pizzeria Demo. Come posso aiutarti?",
       },
     ]);
   };
@@ -453,7 +468,7 @@ export default function AiTestPage() {
     <Card className="mb-4">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
-          <span>Menu della Pizzeria Test</span>
+          <span>Menu della Pizzeria</span>
           <Button
             variant="outline"
             size="sm"
@@ -494,7 +509,7 @@ export default function AiTestPage() {
 
   return (
     <div className="container py-8">
-      <h1 className="text-3xl font-bold mb-6">Test Assistente AI</h1>
+      <h1 className="text-3xl font-bold mb-6">Demo Assistente AI</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
           <Card className="h-[600px] flex flex-col">
@@ -581,15 +596,27 @@ export default function AiTestPage() {
                     onClick={toggleRecording}
                     variant={isRecording ? "destructive" : "outline"}
                     size="icon"
-                    disabled={isLoading || !isVoskReady}
+                    disabled={isLoading || !browserSupportsSTT} // Usa browserSupportsSTT invece di isVoskReady
                     title={
-                      isRecording ? "Ferma registrazione" : "Registra audio"
+                      browserSupportsSTT
+                        ? isRecording
+                          ? "Ferma registrazione"
+                          : "Registra audio"
+                        : "Per usare il microfono, utilizza Chrome o Brave"
                     }
+                    className="relative"
                   >
                     {isRecording ? (
                       <MicOff className="h-4 w-4" />
                     ) : (
                       <Mic className="h-4 w-4" />
+                    )}
+
+                    {/* Tooltip visibile al mouse hover quando il browser non è supportato */}
+                    {!browserSupportsSTT && (
+                      <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs p-2 rounded whitespace-nowrap">
+                        Per usare il microfono, utilizza Chrome o Brave
+                      </div>
                     )}
                   </Button>
                   <Button
@@ -616,7 +643,7 @@ export default function AiTestPage() {
               <div className="space-y-4">
                 <div>
                   <h3 className="font-medium mb-2">Ristorante di Test:</h3>
-                  <p>Pizzeria Test</p>
+                  <p>Pizzeria Demo</p>
                 </div>
 
                 <div>

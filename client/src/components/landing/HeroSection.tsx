@@ -54,6 +54,9 @@ export function HeroSection() {
               <Button variant="outline" size="lg" asChild>
                 <Link to="#">Guarda la Demo</Link>
               </Button>
+              <Button variant="outline" size="lg" asChild>
+                <Link to="/ai-test">Prova la Demo</Link>
+              </Button>
             </div>
           </div>
 

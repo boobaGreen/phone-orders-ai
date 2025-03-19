@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef, useEffect } from "react";
 import { Button } from "../components/ui/button";
@@ -11,6 +13,7 @@ import { Mic, MicOff, Send, RefreshCw } from "lucide-react";
 import { Textarea } from "../components/ui/textarea";
 import { ScrollArea } from "../components/ui/scroll-area";
 import api from "../services/api";
+import { OrderStatus } from "../types";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -22,6 +25,13 @@ interface OrderItem {
   price: number;
   quantity: number;
 }
+
+// // Aggiungi questa interfaccia per gli stati dell'ordine
+// interface OrderState {
+//   id: string;
+//   status: "received" | "viewed" | "preparing" | "ready" | "picked-up";
+//   timestamp: string;
+// }
 
 // Add these declarations for Web Speech API
 declare global {
@@ -42,7 +52,7 @@ export default function AiTestPage() {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [currentOrder, setCurrentOrder] = useState<OrderItem[]>([]);
+  const [, setCurrentOrder] = useState<OrderItem[]>([]);
   const [isVoskReady, setIsVoskReady] = useState(false);
   const [, setLoadingMessage] = useState("");
   const [browserSupportsSTT, setBrowserSupportsSTT] = useState(false);
@@ -58,6 +68,61 @@ export default function AiTestPage() {
   const [testMenu, setTestMenu] = useState<
     { category: string; items: any[] }[]
   >([]);
+
+  // Aggiungi questi stati
+  const [proposedOrder, setProposedOrder] = useState<OrderItem[]>([]);
+  const [confirmedOrder, setConfirmedOrder] = useState<OrderItem[]>([]);
+  const [orderConfirmed, setOrderConfirmed] = useState(false);
+
+  // Sposta questo stato fuori dal componente SlotAvailabilityDisplay
+  const [slots, setSlots] = useState([
+    { time: "19:00-19:15", capacity: 10, available: 4 },
+    { time: "19:15-19:30", capacity: 10, available: 8 },
+    { time: "19:30-19:45", capacity: 10, available: 10 },
+    { time: "19:45-20:00", capacity: 10, available: 10 },
+    { time: "20:00-20:15", capacity: 10, available: 5 },
+  ]);
+
+  useEffect(() => {
+    // Quando gli slot cambiano, aggiorna il messaggio di sistema
+    if (messages.length > 0 && messages[0].role === "system") {
+      // Crea un messaggio di sistema aggiornato con gli slot correnti
+      const slotsInfo = slots
+        .map((slot) => `  * ${slot.time}: ${slot.available} pizze disponibili`)
+        .join("\n");
+
+      const systemMessage = `Sei l'assistente IA della pizzeria "Pizzeria Demo". 
+Aiuta i clienti a ordinare dal nostro menu per il ritiro in negozio.
+
+Orari di apertura: 18:00-22:00
+
+REGOLE IMPORTANTI PER GLI ORDINI:
+1. Ogni slot da 15 minuti può accogliere massimo 10 pizze
+2. Offri sempre un orario di ritiro disponibile in base al numero di pizze ordinate
+3. Chiedi SEMPRE il nome del cliente, è OBBLIGATORIO per l'ordine
+4. Se l'orario richiesto non ha capacità sufficiente, suggerisci l'orario libero più vicino
+5. Usa un tono positivo: quando uno slot ha abbastanza spazio, dì "ottimo" o "perfetto" invece di "purtroppo"
+6. Interpreta formati orari abbreviati: se il cliente dice "19-19:15", intende "19:00-19:15"
+
+INFORMAZIONI SUGLI SLOT ORARI:
+- Gli slot sono di 15 minuti
+- Capacità attuale degli slot: 
+${slotsInfo}
+
+RICHIEDI SEMPRE LA CONFERMA ESPLICITA DELL'ORDINE.
+DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
+- Nome cliente
+- Orario di ritiro
+- Elenco completo dei prodotti
+- Prezzo totale`;
+
+      // Sostituisci il primo messaggio (sistema)
+      setMessages((prev) => [
+        { role: "system", content: systemMessage },
+        ...prev.slice(1),
+      ]);
+    }
+  }, [slots]);
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -381,11 +446,73 @@ export default function AiTestPage() {
     }
   }
 
+  // Aggiungi questa funzione per estrarre il JSON dalla risposta AI
+  const extractOrderDataFromResponse = (response: string) => {
+    try {
+      // Cerca un blocco JSON nella risposta
+      const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/);
+      if (jsonMatch && jsonMatch[1]) {
+        return JSON.parse(jsonMatch[1]);
+      }
+      return null;
+    } catch (e) {
+      console.error("Errore nell'estrazione del JSON:", e);
+      return null;
+    }
+  };
+
+  // Aggiungi questa funzione per rilevare la conferma dell'ordine
+  const isOrderConfirmed = (userMessage: string) => {
+    const confirmPhrases = [
+      "confermo",
+      "va bene",
+      "ok",
+      "procedi",
+      "perfetto",
+      "confermiamo",
+    ];
+    return confirmPhrases.some((phrase) =>
+      userMessage.toLowerCase().includes(phrase)
+    );
+  };
+
   const handleSendText = async () => {
     if (!inputText.trim()) return;
 
     setIsLoading(true);
     const userMessage = inputText;
+    const isConfirmation = isOrderConfirmed(userMessage);
+
+    // Se è una conferma, aggiorna lo stato confermato
+    if (isConfirmation && proposedOrder.length > 0) {
+      setOrderConfirmed(true);
+      setConfirmedOrder([...proposedOrder]);
+
+      // Aggiorna gli slot orari
+      if (proposedOrder.length > 0) {
+        // Assumiamo che l'ordine sia per lo slot 19:15-19:30 per la demo
+        const slotToUpdate = "19:15-19:30";
+        const pizzeOrdinate = proposedOrder.reduce(
+          (sum, item) =>
+            sum +
+            (item.name.includes("Margherita") || item.name.includes("Diavola")
+              ? item.quantity
+              : 0),
+          0
+        );
+
+        setSlots((prevSlots) =>
+          prevSlots.map((slot) =>
+            slot.time === slotToUpdate
+              ? {
+                  ...slot,
+                  available: Math.max(0, slot.available - pizzeOrdinate),
+                }
+              : slot
+          )
+        );
+      }
+    }
 
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setInputText("");
@@ -417,7 +544,16 @@ export default function AiTestPage() {
         setConversationId(newConversationId);
       }
 
-      setCurrentOrder(newOrder || []);
+      // Estrai i dati dell'ordine dalla risposta AI
+      const orderData = extractOrderDataFromResponse(aiResponse);
+      if (orderData && orderData.orderItems) {
+        setCurrentOrder(orderData.orderItems);
+        setProposedOrder(orderData.orderItems);
+      } else if (newOrder) {
+        setCurrentOrder(newOrder);
+        setProposedOrder(newOrder);
+      }
+
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: aiResponse },
@@ -507,6 +643,217 @@ export default function AiTestPage() {
     </Card>
   );
 
+  // Sostituisci il componente SlotAvailabilityDisplay con questo
+
+  const SlotAvailabilityDisplay = () => {
+    return (
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Disponibilità Orari</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {slots.map((slot) => (
+              <div
+                key={slot.time}
+                className="flex items-center justify-between mb-2"
+              >
+                <div className="font-medium w-24">{slot.time}</div>
+                <div className="flex-1 mx-2">
+                  <div className="h-4 bg-gray-100 rounded-full overflow-hidden border">
+                    <div
+                      className={`h-full ${
+                        slot.available <= 2
+                          ? "bg-red-500"
+                          : slot.available <= 5
+                          ? "bg-amber-500"
+                          : "bg-green-500"
+                      }`}
+                      style={{
+                        width: `${
+                          100 - (slot.available / slot.capacity) * 100
+                        }%`,
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="text-sm font-bold w-10 text-center">
+                  {slot.available}/{slot.capacity}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Legenda */}
+          <div className="mt-4 pt-3 border-t border-gray-200">
+            <p className="text-sm font-medium mb-2">Legenda:</p>
+            <div className="flex space-x-4">
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
+                <span className="text-xs">Disponibile</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-amber-500 mr-1"></div>
+                <span className="text-xs">Quasi pieno</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
+                <span className="text-xs">Quasi esaurito</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // Sostituisci il componente OrderStateManager esistente con questo
+
+  const OrderStateManager = ({
+    onUpdate,
+  }: {
+    order: any;
+    onUpdate: (status: OrderStatus) => void;
+  }) => {
+    const [currentState, setCurrentState] = useState(OrderStatus.PENDING);
+
+    // Mappa degli stati per visualizzazione e azioni
+    const stateInfo = {
+      [OrderStatus.PENDING]: {
+        label: "In attesa",
+        color: "bg-amber-100 text-amber-800",
+        icon: "⏱️",
+        nextAction: "Conferma",
+        nextState: OrderStatus.CONFIRMED,
+      },
+      [OrderStatus.CONFIRMED]: {
+        label: "Confermato",
+        color: "bg-blue-100 text-blue-800",
+        icon: "✅",
+        nextAction: "Inizia preparazione",
+        nextState: OrderStatus.PREPARING,
+      },
+      [OrderStatus.PREPARING]: {
+        label: "In preparazione",
+        color: "bg-indigo-100 text-indigo-800",
+        icon: "👨‍🍳",
+        nextAction: "Segna pronto",
+        nextState: OrderStatus.READY,
+      },
+      [OrderStatus.READY]: {
+        label: "Pronto",
+        color: "bg-green-100 text-green-800",
+        icon: "🍕",
+        nextAction: "Segna completato",
+        nextState: OrderStatus.COMPLETED,
+      },
+      [OrderStatus.COMPLETED]: {
+        label: "Completato",
+        color: "bg-gray-100 text-gray-800",
+        icon: "🎉",
+        nextAction: "",
+        nextState: null,
+      },
+      [OrderStatus.CANCELLED]: {
+        label: "Cancellato",
+        color: "bg-red-100 text-red-800",
+        icon: "❌",
+        nextAction: "",
+        nextState: null,
+      },
+    };
+
+    const current = stateInfo[currentState];
+
+    const updateState = (newState: OrderStatus) => {
+      setCurrentState(newState);
+      onUpdate(newState);
+    };
+
+    return (
+      <div className="mt-4">
+        <h3 className="font-medium mb-2">Stato Ordine:</h3>
+
+        {/* Visualizza lo stato corrente */}
+        <div
+          className={`p-3 rounded-md mb-3 flex items-center ${current.color}`}
+        >
+          <span className="mr-2 text-lg">{current.icon}</span>
+          <span className="font-medium">{current.label}</span>
+        </div>
+
+        <div className="flex space-x-2">
+          {/* Bottone per l'azione successiva (se disponibile) */}
+          {current.nextState && (
+            <Button
+              onClick={() => updateState(current.nextState!)}
+              className="flex-grow"
+            >
+              {current.nextAction}
+            </Button>
+          )}
+
+          {/* Bottone per cancellare (disponibile sempre tranne negli stati finali) */}
+          {currentState !== OrderStatus.COMPLETED &&
+            currentState !== OrderStatus.CANCELLED && (
+              <Button
+                variant="destructive"
+                onClick={() => updateState(OrderStatus.CANCELLED)}
+              >
+                Cancella ordine
+              </Button>
+            )}
+        </div>
+      </div>
+    );
+  };
+
+  // // Modifica la funzione che riceve la risposta AI
+  // const handleAIResponse = (response: any) => {
+  //   // Estrai la risposta AI e i dettagli dell'ordine
+  //   const { aiResponse, currentOrder: newOrder, orderConfirmation } = response;
+
+  //   // Aggiorna l'ordine proposto
+  //   if (newOrder) {
+  //     setProposedOrder(newOrder);
+  //   }
+
+  //   // Se l'AI indica che l'ordine è stato confermato, aggiorna l'ordine confermato
+  //   if (orderConfirmation === true) {
+  //     setOrderConfirmed(true);
+  //     setConfirmedOrder(proposedOrder);
+  //   }
+
+  //   // Aggiorna i messaggi con la risposta AI
+  //   setMessages((prev) => [
+  //     ...prev,
+  //     { role: "assistant", content: aiResponse },
+  //   ]);
+  // };
+
+  // Aggiungi questa funzione per estrarre il nome cliente
+
+  const extractCustomerName = () => {
+    // Cerca negli ultimi messaggi dell'assistente una menzione del nome
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.role === "user") {
+        const nameMatch = msg.content.match(
+          /(?:sono|mi chiamo|nome[:]?\s*)\s*(\w+)/i
+        );
+        if (nameMatch) return nameMatch[1];
+      } else if (msg.role === "assistant" && msg.content.includes("Claudio")) {
+        return "Claudio"; // Default per la demo
+      }
+    }
+    return "Cliente"; // Default
+  };
+
+  function extractTimeSlot(): import("react").ReactNode {
+    throw new Error("Function not implemented.");
+  }
+
+  // Modifica il componente Dettagli Ordine per mostrare i dettagli completi
   return (
     <div className="container py-8">
       <h1 className="text-3xl font-bold mb-6">Demo Assistente AI</h1>
@@ -527,20 +874,33 @@ export default function AiTestPage() {
                 {" "}
                 {/* Altezza specifica per garantire lo scroll */}
                 <div className="space-y-4 pb-2">
-                  {messages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={`p-3 rounded-lg ${
-                        msg.role === "user"
-                          ? "bg-primary/10 ml-8"
-                          : msg.role === "system"
-                          ? "bg-muted"
-                          : "bg-secondary/10 mr-8"
-                      }`}
-                    >
-                      <p className="whitespace-pre-line">{msg.content}</p>
-                    </div>
-                  ))}
+                  {messages
+                    .filter((msg, idx) => {
+                      // Nasconde i messaggi di sistema, tranne il primo messaggio di benvenuto
+                      if (msg.role === "system") {
+                        // Se è il primo messaggio e contiene il benvenuto, lo mostra come messaggio dell'assistente
+                        return (
+                          idx === 0 &&
+                          msg.content ===
+                            "Benvenuto alla Pizzeria Demo. Come posso aiutarti?"
+                        );
+                      }
+                      return true; // Mostra tutti gli altri messaggi (user e assistant)
+                    })
+                    .map((msg, idx) => (
+                      <div
+                        key={idx}
+                        className={`p-3 rounded-lg ${
+                          msg.role === "user"
+                            ? "bg-primary/10 ml-8"
+                            : msg.role === "system"
+                            ? "bg-secondary/10 mr-8" // Mostra il messaggio di benvenuto come fosse dell'assistente
+                            : "bg-secondary/10 mr-8"
+                        }`}
+                      >
+                        <p className="whitespace-pre-line">{msg.content}</p>
+                      </div>
+                    ))}
                   {isLoading && (
                     <div className="p-3 rounded-lg bg-secondary/10 mr-8">
                       <p>Elaborazione...</p>
@@ -622,6 +982,7 @@ export default function AiTestPage() {
 
         <div>
           <MenuDisplay />
+          <SlotAvailabilityDisplay />
           <Card>
             <CardHeader>
               <CardTitle>Dettagli Ordine</CardTitle>
@@ -636,7 +997,9 @@ export default function AiTestPage() {
                 <div>
                   <h3 className="font-medium mb-2">Stato:</h3>
                   <p>
-                    {isLoading
+                    {orderConfirmed
+                      ? "Ordine confermato"
+                      : isLoading
                       ? "Elaborazione..."
                       : conversationId
                       ? "Conversazione attiva"
@@ -644,21 +1007,66 @@ export default function AiTestPage() {
                   </p>
                 </div>
 
+                {orderConfirmed && confirmedOrder.length > 0 && (
+                  <div>
+                    <h3 className="font-medium mb-2">Cliente:</h3>
+                    <p>{extractCustomerName()}</p>
+
+                    <h3 className="font-medium mt-2 mb-2">Ritiro:</h3>
+                    <p>{extractTimeSlot()}</p>
+                  </div>
+                )}
+
                 <div>
                   <h3 className="font-medium mb-2">Elementi dell'ordine:</h3>
-                  {currentOrder.length > 0 ? (
-                    <ul className="list-disc list-inside">
-                      {currentOrder.map((item, idx) => (
-                        <li key={idx}>
-                          {item.name} - {item.quantity} x €
-                          {item.price.toFixed(2)}
-                        </li>
-                      ))}
-                    </ul>
+                  {orderConfirmed && confirmedOrder.length > 0 ? (
+                    <div>
+                      <div className="bg-green-100 text-green-800 p-2 mb-3 rounded-md text-sm">
+                        ✅ Ordine confermato dal cliente
+                      </div>
+                      <ul className="list-disc list-inside">
+                        {confirmedOrder.map((item, idx) => (
+                          <li key={idx}>
+                            {item.name} - {item.quantity} x €
+                            {item.price.toFixed(2)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : proposedOrder.length > 0 ? (
+                    <div>
+                      <div className="bg-amber-100 text-amber-800 p-2 mb-3 rounded-md text-sm">
+                        ⏳ In attesa di conferma dal cliente
+                      </div>
+                      <ul className="list-disc list-inside text-gray-500">
+                        {proposedOrder.map((item, idx) => (
+                          <li key={idx}>
+                            {item.name} - {item.quantity} x €
+                            {item.price.toFixed(2)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ) : (
                     <p>Nessun elemento nell'ordine.</p>
                   )}
                 </div>
+
+                {/* Mostra OrderStateManager solo se c'è un ordine CONFERMATO */}
+                {orderConfirmed && confirmedOrder.length > 0 ? (
+                  <OrderStateManager
+                    order={confirmedOrder}
+                    onUpdate={(status) =>
+                      console.log("Order status updated to:", status)
+                    }
+                  />
+                ) : (
+                  <div className="mt-4 p-3 bg-gray-100 rounded-md text-gray-500 text-sm">
+                    {proposedOrder.length > 0
+                      ? "In attesa della conferma del cliente"
+                      : "Effettua un ordine per gestire lo stato"}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

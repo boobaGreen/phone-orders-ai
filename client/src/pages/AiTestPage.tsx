@@ -584,41 +584,21 @@ export default function AiTestPage() {
                   </div>
                 </div>
 
+                {/* Sostituzione completa dei pulsanti */}
                 <div className="flex flex-col gap-2">
-                  {!isVoskReady && (
-                    <div className="text-amber-500 mb-2 text-xs bg-amber-50 p-2 rounded-md border border-amber-200 flex items-center">
-                      <span className="animate-spin mr-2">⚙️</span>
-                      Preparazione modello vocale in corso...
-                      <span className="animate-pulse ml-1">...</span>
-                    </div>
-                  )}
                   <Button
                     onClick={toggleRecording}
                     variant={isRecording ? "destructive" : "outline"}
                     size="icon"
-                    disabled={isLoading || !browserSupportsSTT} // Usa browserSupportsSTT invece di isVoskReady
-                    title={
-                      browserSupportsSTT
-                        ? isRecording
-                          ? "Ferma registrazione"
-                          : "Registra audio"
-                        : "Per usare il microfono, utilizza Chrome o Brave"
-                    }
-                    className="relative"
+                    disabled={isLoading || !browserSupportsSTT}
                   >
                     {isRecording ? (
                       <MicOff className="h-4 w-4" />
                     ) : (
                       <Mic className="h-4 w-4" />
                     )}
-
-                    {/* Tooltip visibile al mouse hover quando il browser non è supportato */}
-                    {!browserSupportsSTT && (
-                      <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs p-2 rounded whitespace-nowrap">
-                        Per usare il microfono, utilizza Chrome o Brave
-                      </div>
-                    )}
                   </Button>
+
                   <Button
                     onClick={handleSendText}
                     disabled={isLoading || !inputText.trim()}
@@ -629,6 +609,13 @@ export default function AiTestPage() {
                   </Button>
                 </div>
               </div>
+              {!browserSupportsSTT && (
+                <div className="mt-2 bg-amber-50 text-amber-800 text-xs p-2 rounded border border-amber-200 flex items-center">
+                  <span className="mr-1">ℹ️</span>
+                  Per utilizzare il microfono, apri questa pagina in Chrome o
+                  Brave
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

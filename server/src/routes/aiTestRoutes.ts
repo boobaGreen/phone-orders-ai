@@ -41,7 +41,7 @@ router.get("/vosk-status", (req: Request, res: Response) => {
 router.get("/menu", getMenu);
 
 // Aggiungi la route per process-text che manca
-router.post("/process-text", authenticate, aiTestController.processText);
+router.post("/process-text", aiTestController.processText);
 
 // Aggiungi la route per eliminare una conversazione
 router.delete(

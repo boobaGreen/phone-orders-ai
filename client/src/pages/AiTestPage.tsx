@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 /* eslint-disable react-hooks/exhaustive-deps */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -97,12 +98,16 @@ Aiuta i clienti a ordinare dal nostro menu per il ritiro in negozio.
 Orari di apertura: 18:00-22:00
 
 REGOLE IMPORTANTI PER GLI ORDINI:
-1. Ogni slot da 15 minuti può accogliere massimo 10 pizze
-2. Offri sempre un orario di ritiro disponibile in base al numero di pizze ordinate
-3. Chiedi SEMPRE il nome del cliente, è OBBLIGATORIO per l'ordine
-4. Se l'orario richiesto non ha capacità sufficiente, suggerisci l'orario libero più vicino
-5. Usa un tono positivo: quando uno slot ha abbastanza spazio, dì "ottimo" o "perfetto" invece di "purtroppo"
-6. Interpreta formati orari abbreviati: se il cliente dice "19-19:15", intende "19:00-19:15"
+1. CHIEDI IMMEDIATAMENTE IL NOME AL CLIENTE SE NON L'HA FORNITO
+2. Il nome cliente è OBBLIGATORIO per completare qualsiasi ordine
+3. NON PRESUMERE MAI IL NOME DEL CLIENTE
+4. Ogni slot da 15 minuti può accogliere massimo 10 pizze
+5. Offri sempre un orario di ritiro disponibile in base al numero di pizze ordinate
+6. Se l'orario richiesto non ha capacità sufficiente, suggerisci l'orario libero più vicino
+7. Usa un tono positivo: quando uno slot ha abbastanza spazio, dì "ottimo" o "perfetto" invece di "purtroppo"
+8. Interpreta formati orari abbreviati: se il cliente dice "19-19:15", intende "19:00-19:15"
+9. TERMINA SEMPRE CON "Confermo l'ordine?" dopo aver fatto il riepilogo
+10. NON PROCEDERE MAI SENZA CONFERMA ESPLICITA DEL CLIENTE
 
 INFORMAZIONI SUGLI SLOT ORARI:
 - Gli slot sono di 15 minuti
@@ -111,7 +116,7 @@ ${slotsInfo}
 
 RICHIEDI SEMPRE LA CONFERMA ESPLICITA DELL'ORDINE.
 DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
-- Nome cliente
+- Nome cliente (che deve essere stato richiesto in precedenza)
 - Orario di ritiro
 - Elenco completo dei prodotti
 - Prezzo totale`;
@@ -240,6 +245,14 @@ DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
 
   // Funzione per avviare/fermare la registrazione
   const toggleRecording = async () => {
+    // Se l'ordine è già confermato, blocca la registrazione
+    if (orderConfirmed && confirmedOrder.length > 0) {
+      alert(
+        "L'ordine è già confermato. Per un nuovo ordine, clicca su 'Nuova Conversazione'."
+      );
+      return;
+    }
+
     if (isRecording) {
       // Stop recording
       if (recognitionRef.current) {
@@ -479,40 +492,18 @@ DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
   const handleSendText = async () => {
     if (!inputText.trim()) return;
 
+    // Se l'ordine è già stato confermato, non permettere di inviare altri messaggi
+    if (orderConfirmed && confirmedOrder.length > 0) {
+      alert(
+        "L'ordine è già confermato. Per un nuovo ordine, clicca su 'Nuova Conversazione'."
+      );
+      setInputText("");
+      return;
+    }
+
     setIsLoading(true);
     const userMessage = inputText;
     const isConfirmation = isOrderConfirmed(userMessage);
-
-    // Se è una conferma, aggiorna lo stato confermato
-    if (isConfirmation && proposedOrder.length > 0) {
-      setOrderConfirmed(true);
-      setConfirmedOrder([...proposedOrder]);
-
-      // Aggiorna gli slot orari
-      if (proposedOrder.length > 0) {
-        // Assumiamo che l'ordine sia per lo slot 19:15-19:30 per la demo
-        const slotToUpdate = "19:15-19:30";
-        const pizzeOrdinate = proposedOrder.reduce(
-          (sum, item) =>
-            sum +
-            (item.name.includes("Margherita") || item.name.includes("Diavola")
-              ? item.quantity
-              : 0),
-          0
-        );
-
-        setSlots((prevSlots) =>
-          prevSlots.map((slot) =>
-            slot.time === slotToUpdate
-              ? {
-                  ...slot,
-                  available: Math.max(0, slot.available - pizzeOrdinate),
-                }
-              : slot
-          )
-        );
-      }
-    }
 
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setInputText("");
@@ -552,6 +543,42 @@ DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
       } else if (newOrder) {
         setCurrentOrder(newOrder);
         setProposedOrder(newOrder);
+      }
+
+      // Se è una conferma, aggiorna lo stato e il pannello degli slot
+      if (isConfirmation && proposedOrder.length > 0) {
+        setOrderConfirmed(true);
+        setConfirmedOrder([...proposedOrder]);
+
+        // Estrai lo slot scelto dal messaggio AI
+        const slot = extractTimeSlot();
+        console.log("Slot estratto:", slot);
+
+        // Conta le pizze nell'ordine
+        const pizzeOrdinate = proposedOrder.reduce(
+          (sum, item) =>
+            sum +
+            (item.name.toLowerCase().includes("pizza") ||
+            item.name.toLowerCase().includes("margherita") ||
+            item.name.toLowerCase().includes("diavola") ||
+            item.name.toLowerCase().includes("marinara") ||
+            item.name.toLowerCase().includes("capricciosa")
+              ? item.quantity
+              : 0),
+          0
+        );
+
+        // Aggiorna gli slot
+        setSlots((prevSlots) =>
+          prevSlots.map((slotItem) =>
+            slotItem.time === slot
+              ? {
+                  ...slotItem,
+                  available: Math.max(0, slotItem.available - pizzeOrdinate),
+                }
+              : slotItem
+          )
+        );
       }
 
       setMessages((prev) => [
@@ -849,9 +876,45 @@ DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
     return "Cliente"; // Default
   };
 
-  function extractTimeSlot(): import("react").ReactNode {
-    throw new Error("Function not implemented.");
-  }
+  // Sostituisci la funzione extractTimeSlot con questa implementazione completa
+
+  const extractTimeSlot = (): string => {
+    // Cerca negli ultimi messaggi dell'assistente
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.role === "assistant") {
+        // Cerca pattern come "19:00-19:15" o "Orario di ritiro: 19:00-19:15"
+        const slotMatch = msg.content.match(
+          /(\d{1,2}[:\.]\d{2})-(\d{1,2}[:\.]\d{2})/
+        );
+        if (slotMatch) {
+          return slotMatch[0]; // Restituisce il formato "19:00-19:15"
+        }
+
+        // Cerca pattern "Orario: 19:00"
+        const timeMatch = msg.content.match(
+          /[Oo]rario(?:\ di ritiro)?:?\s*(\d{1,2}[:\.]\d{2})/
+        );
+        if (timeMatch) {
+          const time = timeMatch[1];
+          // Determina lo slot basato sull'ora
+          const hour = parseInt(time.split(/[:\.]/)[0]);
+          const minutes = parseInt(time.split(/[:\.]/)[1]);
+          const slotMinutes = Math.floor(minutes / 15) * 15;
+          const slotEnd =
+            slotMinutes === 45
+              ? `${hour + 1}:00`
+              : `${hour}:${(slotMinutes + 15).toString().padStart(2, "0")}`;
+          return `${hour}:${slotMinutes
+            .toString()
+            .padStart(2, "0")}-${slotEnd}`;
+        }
+      }
+    }
+
+    // Se non troviamo un orario nei messaggi, restituisci un valore predefinito
+    return "Orario non specificato";
+  };
 
   // Modifica il componente Dettagli Ordine per mostrare i dettagli completi
   return (
@@ -913,14 +976,19 @@ DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
               <div className="mt-4 flex gap-2">
                 <div className="flex-grow relative">
                   <Textarea
-                    placeholder="Scrivi il tuo messaggio qui..."
+                    placeholder={
+                      orderConfirmed
+                        ? "Ordine confermato. Clicca 'Nuova Conversazione' per un nuovo ordine."
+                        : "Scrivi il tuo messaggio qui..."
+                    }
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => {
                       if (
                         e.key === "Enter" &&
                         !e.shiftKey &&
-                        inputText.trim()
+                        inputText.trim() &&
+                        !orderConfirmed
                       ) {
                         e.preventDefault();
                         handleSendText();
@@ -928,6 +996,7 @@ DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
                     }}
                     className="w-full min-h-[120px] max-h-[300px] overflow-auto"
                     rows={5}
+                    disabled={orderConfirmed && confirmedOrder.length > 0}
                     style={{
                       resize: "vertical",
                       lineHeight: "1.5",
@@ -950,7 +1019,11 @@ DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
                     onClick={toggleRecording}
                     variant={isRecording ? "destructive" : "outline"}
                     size="icon"
-                    disabled={isLoading || !browserSupportsSTT}
+                    disabled={
+                      isLoading ||
+                      !browserSupportsSTT ||
+                      (orderConfirmed && confirmedOrder.length > 0)
+                    }
                   >
                     {isRecording ? (
                       <MicOff className="h-4 w-4" />
@@ -961,7 +1034,11 @@ DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
 
                   <Button
                     onClick={handleSendText}
-                    disabled={isLoading || !inputText.trim()}
+                    disabled={
+                      isLoading ||
+                      !inputText.trim() ||
+                      (orderConfirmed && confirmedOrder.length > 0)
+                    }
                     size="icon"
                     title="Invia messaggio"
                   >

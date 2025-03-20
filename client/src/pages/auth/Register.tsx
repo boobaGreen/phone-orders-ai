@@ -63,7 +63,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[color:var(--color-background)]">
-      <div className="max-w-md w-full p-8 rounded-lg bg-[color:var(--color-card)] shadow-lg">
+      <div className="max-w-md w-full p-8 rounded-lg bg-gray-800 shadow-lg">
         <h2 className="text-2xl font-bold text-center text-black dark:text-white mb-6">
           Registrati
         </h2>
@@ -146,7 +146,7 @@ const Register = () => {
             <div className="w-full border-t border-[color:var(--color-border)]"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-[color:var(--color-card)] text-gray-600 dark:text-gray-300 font-medium">
+            <span className="px-2 text-gray-600 dark:text-gray-300 font-medium">
               oppure
             </span>
           </div>
@@ -190,7 +190,7 @@ const Register = () => {
         </button>
 
         {/* Link per login */}
-        <p className="mt-4 text-center text-sm text-gray-800 dark:text-gray-300">
+        <p className="mt-4 text-center text-sm">
           Hai già un account?{" "}
           <Link
             to="/auth/login"

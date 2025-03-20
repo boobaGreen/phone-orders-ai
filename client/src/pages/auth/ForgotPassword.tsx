@@ -32,7 +32,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-[color:var(--color-background)]">
-      <div className="w-full max-w-md p-8 space-y-8 bg-[color:var(--color-card)] rounded-lg shadow-lg">
+      <div className="w-full max-w-md p-8 space-y-8 bg-gray-800 rounded-lg shadow-lg">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-black dark:text-white">
             Recupero Password
@@ -86,7 +86,7 @@ const ForgotPassword = () => {
           </div>
         </form>
 
-        <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-center text-sm text-gray-600 dark:text-gray-300">
           <Link
             to="/auth/login"
             className="font-medium text-[#4285F4] dark:text-[#8ab4f8] hover:underline"

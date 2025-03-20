@@ -142,9 +142,6 @@ const Register = () => {
 
         {/* Separatore */}
         <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-[color:var(--color-border)]"></div>
-          </div>
           <div className="relative flex justify-center text-sm">
             <span className="px-2 text-gray-600 dark:text-gray-300 font-medium">
               oppure

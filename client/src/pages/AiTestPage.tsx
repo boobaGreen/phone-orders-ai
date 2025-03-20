@@ -50,6 +50,19 @@ export default function AiTestPage() {
       role: "system",
       content: "Benvenuto alla Pizzeria Demo. Come posso aiutarti?",
     },
+    {
+      role: "assistant",
+      content: `Benvenuto alla Pizzeria Demo! 🍕
+
+Come posso aiutarti oggi?
+
+Per effettuare un ordine mi serviranno:
+- Il tuo nome
+- I prodotti che desideri
+- Un orario di ritiro (in slot da 15 minuti)
+
+Cosa desideri ordinare?`,
+    },
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -606,32 +619,78 @@ DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
     }
   };
 
+  // Modifica la funzione resetConversation
+
   const resetConversation = async () => {
     if (conversationId) {
       try {
-        // Aggiornato da axios a api
         await api.delete(`/ai-test/conversation/${conversationId}`);
       } catch (err) {
         console.error("Errore nel reset della conversazione:", err);
       }
     }
 
+    // Reset completo di tutti gli stati
     setConversationId(null);
     setCurrentOrder([]);
+    setProposedOrder([]);
+    setConfirmedOrder([]);
+    setOrderConfirmed(false);
+
+    // Messaggio di benvenuto migliorato con nome pizzeria e regole
+    const welcomeMessage = `Benvenuto alla Pizzeria Demo! 🍕
+
+Come posso aiutarti oggi?
+
+Per effettuare un ordine mi serviranno:
+- Il tuo nome
+- I prodotti che desideri
+- Un orario di ritiro (in slot da 15 minuti)
+
+Cosa desideri ordinare?`;
+
     setMessages([
+      // Aggiorna il prompt del sistema per assicurarti che l'AI non ricordi il nome
       {
         role: "system",
-        content: "Benvenuto alla Pizzeria Demo. Come posso aiutarti?",
+        content: `Sei l'assistente IA della pizzeria "Pizzeria Demo". 
+Aiuta i clienti a ordinare dal nostro menu per il ritiro in negozio.
+
+Orari di apertura: 18:00-22:00
+
+REGOLE IMPORTANTI PER GLI ORDINI:
+1. CHIEDI IMMEDIATAMENTE IL NOME AL CLIENTE SE NON L'HA FORNITO
+2. Il nome cliente è OBBLIGATORIO per completare qualsiasi ordine
+3. NON PRESUMERE MAI IL NOME DEL CLIENTE e NON RICORDARE nomi dai messaggi precedenti
+4. INIZIA OGNI NUOVA CONVERSAZIONE presentando la pizzeria e chiedendo come puoi aiutare
+5. Ogni slot da 15 minuti può accogliere massimo 10 pizze
+6. Offri sempre un orario di ritiro disponibile in base al numero di pizze ordinate
+7. Se l'orario richiesto non ha capacità sufficiente, suggerisci l'orario libero più vicino
+8. Usa un tono positivo: quando uno slot ha abbastanza spazio, dì "ottimo" o "perfetto" invece di "purtroppo"
+9. TERMINA SEMPRE CON "Confermo l'ordine?" dopo aver fatto il riepilogo
+10. NON PROCEDERE MAI SENZA CONFERMA ESPLICITA DEL CLIENTE
+
+INFORMAZIONI SUGLI SLOT ORARI:
+- Gli slot sono di 15 minuti
+- Capacità attuale degli slot: 
+${slots
+  .map((slot) => `  * ${slot.time}: ${slot.available} pizze disponibili`)
+  .join("\n")}`,
+      },
+      // Messaggio di benvenuto all'inizio di ogni conversazione
+      {
+        role: "assistant",
+        content: welcomeMessage,
       },
     ]);
   };
 
-  // Aggiungi questo componente nella UI
+  // Modifica il componente MenuDisplay
   const MenuDisplay = () => (
     <Card className="mb-4">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
-          <span>Menu della Pizzeria</span>
+          <span>Menu Pizzeria Demo</span>
           <Button
             variant="outline"
             size="sm"
@@ -725,7 +784,7 @@ DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
               </div>
               <div className="flex items-center">
                 <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
-                <span className="text-xs">Quasi esaurito</span>
+                <span className="text-xs">Esaurito</span>
               </div>
             </div>
           </div>
@@ -809,28 +868,15 @@ DOPO LA CONFERMA, INCLUDI SEMPRE QUESTI DETTAGLI NELLA TUA RISPOSTA:
           <span className="font-medium">{current.label}</span>
         </div>
 
-        <div className="flex space-x-2">
-          {/* Bottone per l'azione successiva (se disponibile) */}
-          {current.nextState && (
-            <Button
-              onClick={() => updateState(current.nextState!)}
-              className="flex-grow"
-            >
-              {current.nextAction}
-            </Button>
-          )}
-
-          {/* Bottone per cancellare (disponibile sempre tranne negli stati finali) */}
-          {currentState !== OrderStatus.COMPLETED &&
-            currentState !== OrderStatus.CANCELLED && (
-              <Button
-                variant="destructive"
-                onClick={() => updateState(OrderStatus.CANCELLED)}
-              >
-                Cancella ordine
-              </Button>
-            )}
-        </div>
+        {/* Solo il bottone per l'azione successiva, rimuoviamo il bottone di cancellazione */}
+        {current.nextState && (
+          <Button
+            onClick={() => updateState(current.nextState!)}
+            className="w-full"
+          >
+            {current.nextAction}
+          </Button>
+        )}
       </div>
     );
   };

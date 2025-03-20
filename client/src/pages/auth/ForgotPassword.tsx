@@ -34,8 +34,10 @@ const ForgotPassword = () => {
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-[color:var(--color-background)]">
       <div className="w-full max-w-md p-8 space-y-8 bg-[color:var(--color-card)] rounded-lg shadow-lg">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Recupero Password</h1>
-          <p className="mt-2 text-[color:var(--color-muted-foreground)]">
+          <h1 className="text-2xl font-bold text-black dark:text-white">
+            Recupero Password
+          </h1>
+          <p className="mt-2 text-gray-700 dark:text-gray-300">
             Inserisci l'email associata al tuo account per ricevere il link di
             reset.
           </p>
@@ -57,7 +59,7 @@ const ForgotPassword = () => {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-[color:var(--color-foreground)]"
+              className="block text-sm font-medium text-black dark:text-white"
             >
               Email
             </label>
@@ -66,7 +68,7 @@ const ForgotPassword = () => {
               name="email"
               type="email"
               required
-              className="block w-full px-3 py-2 mt-1 border rounded-md shadow-sm text-[color:var(--color-foreground)] bg-[color:var(--color-input)] border-[color:var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-transparent"
+              className="block w-full px-3 py-2 mt-1 border rounded-md shadow-sm text-black dark:text-white bg-[color:var(--color-input)] border-[color:var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[#4285F4]"
               placeholder="Il tuo indirizzo email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -77,17 +79,17 @@ const ForgotPassword = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex justify-center w-full px-4 py-2 text-sm font-medium text-center rounded-md shadow-sm text-[color:var(--color-primary-foreground)] bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-dark)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex justify-center w-full px-4 py-2 text-sm font-medium text-center rounded-md shadow-sm text-white bg-[#4285F4] hover:bg-[#3367d6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4285F4] disabled:opacity-50 transition-colors"
             >
               {isLoading ? "Invio in corso..." : "Invia link di reset"}
             </button>
           </div>
         </form>
 
-        <div className="text-center text-sm text-[color:var(--color-muted-foreground)]">
+        <div className="text-center text-sm text-gray-600 dark:text-gray-400">
           <Link
             to="/auth/login"
-            className="font-medium text-[color:var(--color-primary)] hover:text-[color:var(--color-primary-dark)]"
+            className="font-medium text-[#4285F4] dark:text-[#8ab4f8] hover:underline"
           >
             Torna al login
           </Link>

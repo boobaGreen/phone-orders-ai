@@ -45,8 +45,10 @@ const ResetPassword = () => {
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-[color:var(--color-background)]">
       <div className="w-full max-w-md p-8 space-y-8 bg-[color:var(--color-card)] rounded-lg shadow-lg">
         <div className="text-center">
-          <h1 className="text-2xl font-bold">Reimposta la tua password</h1>
-          <p className="mt-2 text-[color:var(--color-muted-foreground)]">
+          <h1 className="text-2xl font-bold text-black dark:text-white">
+            Reimposta la tua password
+          </h1>
+          <p className="mt-2 text-gray-700 dark:text-gray-300">
             Inserisci la nuova password per il tuo account.
           </p>
         </div>
@@ -61,7 +63,7 @@ const ResetPassword = () => {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-[color:var(--color-foreground)]"
+              className="block text-sm font-medium text-black dark:text-white"
             >
               Nuova Password
             </label>
@@ -70,7 +72,7 @@ const ResetPassword = () => {
               name="password"
               type="password"
               required
-              className="block w-full px-3 py-2 mt-1 border rounded-md shadow-sm text-[color:var(--color-foreground)] bg-[color:var(--color-input)] border-[color:var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-transparent"
+              className="block w-full px-3 py-2 mt-1 border rounded-md shadow-sm text-black dark:text-white bg-[color:var(--color-input)] border-[color:var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[#4285F4]"
               placeholder="Almeno 8 caratteri"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -80,7 +82,7 @@ const ResetPassword = () => {
           <div>
             <label
               htmlFor="confirmPassword"
-              className="block text-sm font-medium text-[color:var(--color-foreground)]"
+              className="block text-sm font-medium text-black dark:text-white"
             >
               Conferma Password
             </label>
@@ -89,7 +91,7 @@ const ResetPassword = () => {
               name="confirmPassword"
               type="password"
               required
-              className="block w-full px-3 py-2 mt-1 border rounded-md shadow-sm text-[color:var(--color-foreground)] bg-[color:var(--color-input)] border-[color:var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary)] focus:border-transparent"
+              className="block w-full px-3 py-2 mt-1 border rounded-md shadow-sm text-black dark:text-white bg-[color:var(--color-input)] border-[color:var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[#4285F4]"
               placeholder="Ripeti la nuova password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -100,7 +102,7 @@ const ResetPassword = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex justify-center w-full px-4 py-2 text-sm font-medium text-center rounded-md shadow-sm text-[color:var(--color-primary-foreground)] bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-dark)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[color:var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex justify-center w-full px-4 py-2 text-sm font-medium text-center rounded-md shadow-sm text-white bg-[#4285F4] hover:bg-[#3367d6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4285F4] disabled:opacity-50 transition-colors"
             >
               {isLoading ? "Aggiornamento..." : "Aggiorna Password"}
             </button>
